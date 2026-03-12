@@ -228,7 +228,7 @@ textarea{font-family:inherit}
 
 .hero{
   background:linear-gradient(180deg, var(--blue2), var(--blue));
-  color:#fff;
+  color:#e60303;
   padding:28px 0 34px;
 }
 .hero__inner{
