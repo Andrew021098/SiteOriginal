@@ -1,0 +1,39 @@
+{
+  "vendedores": [
+    {
+      "id": 1,
+      "nome": "Pamela",
+      "telefone": "5521959039201",
+      "ativo": true,
+      "ordem": 1
+    },
+    {
+      "id": 2,
+      "nome": "Ingrid",
+      "telefone": "5521964801798",
+      "ativo": true,
+      "ordem": 2
+    },
+    {
+      "id": 3,
+      "nome": "Andrew",
+      "telefone": "5521983297206",
+      "ativo": false,
+      "ordem": 3
+    },
+    {
+      "id": 4,
+      "nome": "Caçamba",
+      "telefone": "5521986510686",
+      "ativo": true,
+      "ordem": 4
+    },
+    {
+      "id": 5,
+      "nome": "Teste5",
+      "telefone": "5521986510686",
+      "ativo": true,
+      "ordem": 5
+    }
+  ]
+}

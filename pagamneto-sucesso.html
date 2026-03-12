@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pagamento concluído | Conde de Bonfim</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="checkoutPage">
+    <section class="section section--checkout">
+      <div class="container" style="max-width: 860px;">
+        <div class="checkoutCard" style="text-align:center;">
+          <div style="font-size:56px; margin-bottom:12px;">✅</div>
+          <h1 style="margin-top:0;">Pagamento recebido</h1>
+          <p style="color:var(--muted); max-width: 60ch; margin: 0 auto 20px;">
+            Seu pagamento foi finalizado. Abaixo estão os dados retornados pela InfinitePay.
+          </p>
+
+          <div id="paymentResultBox" style="text-align:left; margin-top:24px;"></div>
+
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:24px;">
+            <a class="btn btn--blue" href="./index.html">Voltar para loja</a>
+            <button class="btn btn--outline" id="checkPaymentStatusBtn" type="button">Consultar status</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const PAYMENT_CONFIG = {
+      handle: "andrewadlm",
+      paymentCheckUrl: "https://api.infinitepay.io/invoices/public/checkout/payment_check"
+    };
+
+    function getParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        receipt_url: params.get("receipt_url") || "",
+        order_nsu: params.get("order_nsu") || "",
+        slug: params.get("slug") || "",
+        capture_method: params.get("capture_method") || "",
+        transaction_nsu: params.get("transaction_nsu") || ""
+      };
+    }
+
+    function renderParams() {
+      const data = getParams();
+      const box = document.getElementById("paymentResultBox");
+
+      box.innerHTML = `
+        <div class="checkoutSummary__items">
+          <div class="checkoutSummary__line"><span>Order NSU</span><strong>${data.order_nsu || "-"}</strong></div>
+          <div class="checkoutSummary__line"><span>Slug</span><strong>${data.slug || "-"}</strong></div>
+          <div class="checkoutSummary__line"><span>Forma de pagamento</span><strong>${data.capture_method || "-"}</strong></div>
+          <div class="checkoutSummary__line"><span>Transaction NSU</span><strong>${data.transaction_nsu || "-"}</strong></div>
+          <div class="checkoutSummary__line"><span>Comprovante</span><strong>${data.receipt_url ? `<a href="${data.receipt_url}" target="_blank" rel="noreferrer">Abrir comprovante</a>` : "-"}</strong></div>
+        </div>
+      `;
+    }
+
+    async function checkPaymentStatus() {
+      const data = getParams();
+
+      if (!data.order_nsu || !data.slug || !data.transaction_nsu) {
+        alert("Parâmetros insuficientes para consultar o pagamento.");
+        return;
+      }
+
+      try {
+        const response = await fetch(PAYMENT_CONFIG.paymentCheckUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            handle: PAYMENT_CONFIG.handle,
+            order_nsu: data.order_nsu,
+            transaction_nsu: data.transaction_nsu,
+            slug: data.slug
+          })
+        });
+
+        const result = await response.json();
+        console.log("Status do pagamento:", result);
+
+        if (result.success) {
+          alert(
+            `Pagamento consultado.\n\nPago: ${result.paid ? "Sim" : "Não"}\nValor: ${result.amount}\nPago: ${result.paid_amount}\nParcelas: ${result.installments}\nMétodo: ${result.capture_method}`
+          );
+        } else {
+          alert("Não foi possível confirmar o status.");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao consultar status do pagamento.");
+      }
+    }
+
+    document.getElementById("checkPaymentStatusBtn").addEventListener("click", checkPaymentStatus);
+    renderParams();
+  </script>
+</body>
+</html>

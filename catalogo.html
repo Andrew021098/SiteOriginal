@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Catálogo | Conde de Bonfim</title>
+  <meta
+    name="description"
+    content="Catálogo completo de produtos da Conde de Bonfim."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="container topbar__inner">
+      <div class="topbar__left">
+        <span class="topbar__pin" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M12 22s7-5.1 7-12a7 7 0 1 0-14 0c0 6.9 7 12 7 12Z" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </span>
+        <span>Rio de Janeiro, RJ</span>
+      </div>
+
+      <nav class="topbar__right" aria-label="Navegação superior">
+        <a href="./index.html#entrega" class="topbar__link">Entrega e Retirada</a>
+        <a href="./index.html#sobre" class="topbar__link">Sobre Nós</a>
+        <a href="./index.html#contato" class="topbar__link">Contato</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container header__inner">
+      <a class="brand" href="./index.html" aria-label="Ir para o início">
+        <div class="brand__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22">
+            <path d="M4 21V3h10v18M14 9h6v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M8 7h2M8 11h2M8 15h2M16 13h2M16 17h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand__text">
+          <strong>Conde de Bonfim</strong>
+          <span>Materiais de Construção</span>
+        </div>
+      </a>
+
+      <form class="search" role="search" aria-label="Buscar produtos">
+        <div class="search__field">
+          <span class="search__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M16.5 16.5 21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <input type="search" placeholder="Busque por produtos, categorias..." autocomplete="off" />
+        </div>
+        <button class="btn btn--yellow" type="button">Buscar</button>
+      </form>
+
+      <button class="cartBtn" id="openCart" type="button" aria-label="Abrir carrinho">
+        <span class="cartBtn__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22">
+            <path d="M6 6h15l-2 9H7L5 3H2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="9" cy="20" r="1.7" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="18" cy="20" r="1.7" fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </span>
+        <span class="cartBtn__badge" id="cartCount">0</span>
+      </button>
+    </div>
+
+    <div class="headerMenu">
+      <div class="container headerMenu__inner">
+        <nav class="menu" aria-label="Menu principal">
+          <a href="./index.html" class="menu__link">Início</a>
+          <a href="./catalogo.html" class="menu__link is-active">Catálogo</a>
+          <a href="./index.html#ofertas" class="menu__link">Promoções</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="catalogPage">
+    <div class="container">
+      <div class="catalogBreadcrumb">
+        <a href="./index.html">Início</a> / <strong>Catálogo</strong>
+      </div>
+
+      <h1 class="catalogTitle">Catálogo de Produtos</h1>
+      <p class="catalogCount"><span id="catalogCount">0</span> produtos encontrados</p>
+
+      <div class="catalogLayout">
+        <aside class="catalogSidebar">
+          <h3 class="filterTitle">Filtros</h3>
+
+          <div class="filterGroup">
+            <strong>Categorias</strong>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Todos" checked>
+              <span>Todos</span>
+            </label>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Materiais de Construção">
+              <span>Materiais de Construção</span>
+            </label>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Cimento e Concreto">
+              <span>Cimento e Concreto</span>
+            </label>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Blocos e Tijolos">
+              <span>Blocos e Tijolos</span>
+            </label>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Ferragens">
+              <span>Ferragens</span>
+            </label>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Materiais Elétricos">
+              <span>Materiais Elétricos</span>
+            </label>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Materiais Hidráulicos">
+              <span>Materiais Hidráulicos</span>
+            </label>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Tintas e Acessórios">
+              <span>Tintas e Acessórios</span>
+            </label>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Ferramentas">
+              <span>Ferramentas</span>
+            </label>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Portas e Janelas">
+              <span>Portas e Janelas</span>
+            </label>
+
+            <label class="filterItem">
+              <input type="radio" name="categoryFilter" value="Banheiros e Acessórios">
+              <span>Banheiros e Acessórios</span>
+            </label>
+          </div>
+        </aside>
+
+        <div class="catalogProducts">
+          <div class="catalogToolbar">
+            <label class="sortBox">
+              <span>Ordenar por:</span>
+              <select id="catalogSort">
+                <option value="default">Padrão</option>
+                <option value="price-asc">Menor preço</option>
+                <option value="price-desc">Maior preço</option>
+                <option value="name-asc">Nome A-Z</option>
+                <option value="name-desc">Nome Z-A</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="catalogGrid" id="catalogGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <a class="waFloat" id="waFloat" href="#" target="_blank" rel="noreferrer" aria-label="WhatsApp">
+      <span class="waFloat__icon" aria-hidden="true">💬</span>
+    </a>
+
+    <button class="floatingCart" id="floatingCart" type="button" aria-label="Abrir carrinho">
+      <span class="floatingCart__icon" aria-hidden="true">🛒</span>
+      <span class="floatingCart__badge" id="floatingCartCount">0</span>
+    </button>
+
+    <!-- MODAL DE PRODUTO -->
+<div class="productModal" id="productModal" aria-hidden="true">
+
+  <div class="productModal__backdrop" id="productModalBackdrop"></div>
+
+  <div class="productModal__panel">
+
+    <div class="productModal__head">
+      <strong id="modalProductName">Produto</strong>
+
+      <button
+        class="iconBtn"
+        id="closeProductModal"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="productModal__body">
+
+      <div class="productModal__grid">
+
+        <div
+          class="productModal__image"
+          id="modalProductImage"
+        ></div>
+
+        <div class="productModal__content">
+
+          <div
+            class="productModal__category"
+            id="modalProductCategory"
+          >
+            Categoria
+          </div>
+
+          <div
+            class="productModal__priceOld"
+            id="modalProductOldPrice"
+          ></div>
+
+          <div
+            class="productModal__price"
+            id="modalProductPrice"
+          >
+            R$ 0,00
+          </div>
+
+          <p
+            class="productModal__description"
+            id="modalProductDescription"
+          >
+            Descrição do produto
+          </p>
+
+          <!-- QUANTIDADE -->
+          <div class="productModal__qtyBlock">
+
+            <span class="productModal__qtyLabel">
+              Quantidade
+            </span>
+
+            <div class="modalQty">
+
+              <button
+                class="modalQtyBtn"
+                id="modalQtyMinus"
+                type="button"
+              >
+                −
+              </button>
+
+              <input
+                type="number"
+                id="modalQtyInput"
+                class="modalQtyInput"
+                value="1"
+                min="1"
+              >
+
+              <button
+                class="modalQtyBtn"
+                id="modalQtyPlus"
+                type="button"
+              >
+                +
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="productModal__actions">
+
+            <button
+              class="btn btn--yellow"
+              id="modalAddToCart"
+              type="button"
+            >
+              Adicionar ao carrinho
+            </button>
+
+            <button
+              class="btn btn--outline"
+              id="modalBuyNow"
+              type="button"
+            >
+              Comprar agora
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="drawer" id="drawer" aria-hidden="true">
+      <div class="drawer__backdrop" id="drawerBackdrop"></div>
+
+      <aside class="drawer__panel" role="dialog" aria-label="Carrinho">
+        <div class="drawer__head">
+          <strong>Carrinho</strong>
+          <button class="iconBtn" id="closeCart" type="button" aria-label="Fechar">✕</button>
+        </div>
+
+        <div class="drawer__body">
+          <div class="cartList" id="cartList"></div>
+
+          <div class="cartEmpty" id="cartEmpty">
+            <strong>Seu carrinho está vazio.</strong>
+            <span>Adicione produtos para montar seu pedido.</span>
+          </div>
+        </div>
+
+        <div class="cartFooter">
+  <div class="cartSubtotal">
+    <span>Subtotal</span>
+    <strong id="cartSubtotal">R$ 0,00</strong>
+  </div>
+
+  <div class="cartCustomerFields">
+    <label class="cartField">
+      <span>Seu nome</span>
+      <input type="text" id="customerName" placeholder="Digite seu nome" autocomplete="name" />
+    </label>
+
+    <label class="cartField">
+      <span>Telefone</span>
+      <input type="tel" id="customerPhone" placeholder="(21) 99999-9999" autocomplete="tel" />
+    </label>
+
+    <div class="cartField">
+      <span>Como deseja receber?</span>
+
+      <div class="deliveryOptions">
+        <label class="deliveryOption">
+          <input type="radio" name="deliveryType" value="Entrega" checked />
+          <span>Entrega</span>
+        </label>
+
+        <label class="deliveryOption">
+          <input type="radio" name="deliveryType" value="Retirada" />
+          <span>Retirar na loja</span>
+        </label>
+      </div>
+    </div>
+
+    <label class="cartField" id="addressField">
+      <span>Endereço para entrega</span>
+      <textarea id="customerAddress" placeholder="Rua, número, bairro, complemento" rows="3" autocomplete="street-address"></textarea>
+    </label>
+  </div>
+
+  <button id="continueShoppingBtn" class="continueShoppingBtn" type="button">
+    Continuar comprando
+  </button>
+
+  <button id="goCheckoutBtn" class="checkoutBtn checkoutBtn--blue" type="button">
+    Finalizar compra
+  </button>
+</div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
