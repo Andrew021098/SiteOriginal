@@ -252,7 +252,7 @@ async function sendBudgetToWhatsApp() {
   } catch (error) {
     console.error("Erro ao conectar com o backend:", error);
     setLeadButtonLoading(false);
-    alert("Erro ao conectar com o backend. Verifique se o servidor Node.js está rodando em http://localhost:3000.");
+    alert("Erro ao conectar com o backend. Verifique se o servidor Node.js está rodando em https://sitecondebonfim.onrender.com.");
   }
 }
 
@@ -262,7 +262,7 @@ async function proceedToPayment() {
   if (!validateCheckoutData(data)) return;
 
   try {
-    const response = await fetch("http://localhost:3000/create-checkout", {
+    const response = await fetch("https://sitecondebonfim.onrender.com/create-checkout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
