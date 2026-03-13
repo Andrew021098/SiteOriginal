@@ -110,6 +110,29 @@ function waLink(message) {
   return `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(message)}`;
 }
 
+async function fetchProducts() {
+  try {
+    const response = await fetch(PRODUCTS_ENDPOINT);
+
+    if (!response.ok) {
+      throw new Error(`Erro HTTP: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success || !Array.isArray(data.products)) {
+      throw new Error("Resposta inválida da API.");
+    }
+
+    PRODUCTS = data.products;
+    return PRODUCTS;
+  } catch (error) {
+    console.error("Erro ao carregar produtos:", error);
+    PRODUCTS = [];
+    return [];
+  }
+}
+
 function loadCart() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return;
@@ -901,12 +924,11 @@ function setupCatalog() {
   renderCatalog();
 }
 
-function init() {
+async function init() {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
   loadCart();
-  renderAllSections();
   renderBrands();
   renderCart();
   setupSearch();
@@ -914,11 +936,19 @@ function init() {
   setupWhatsApp();
   setupDrawer();
   setupProductModal();
-  setupCatalog();
- 
+
+  const products = await fetchProducts();
+
+  if (products.length) {
+    renderAllSections();
+    setupCatalog();
+  } else {
+    console.error("Nenhum produto carregado.");
+  }
+
   if (localStorage.getItem("openCart") === "true") {
-  openDrawer();
-  localStorage.removeItem("openCart");
+    openDrawer();
+    localStorage.removeItem("openCart");
   }
 }
 
