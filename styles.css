@@ -912,7 +912,7 @@ textarea{font-family:inherit}
   margin-top:14px;
 }
 .checkoutPrimaryBtn:hover{
-  filter:brightness(.98);
+  background:#130080;
 }
 .checkoutSecondaryBtn{
   margin-top:10px;
@@ -926,11 +926,11 @@ textarea{font-family:inherit}
 .checkoutTertiaryBtn{
   margin-top:10px;
   border:1px solid var(--line);
-  background:#ffffff;
+  background:#ebebeb;
   color:#111827;
 }
 .checkoutTertiaryBtn:hover{
-    background:#f7f9ff;
+    background:#bdbdbd;
 }
 .checkoutSummary__tip{
   margin:12px 0 0;
