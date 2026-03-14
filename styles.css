@@ -1595,3 +1595,8 @@ textarea{font-family:inherit}
 .checkoutBtn--blue:hover{
   filter:brightness(.98);
 }
+.logoIcon img{
+  height:40px;
+  width:auto;
+  display:block;
+}
