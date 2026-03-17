@@ -4,7 +4,6 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-const sql = require("mssql");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,58 +25,7 @@ app.use(express.json());
 const vendedoresFile = path.join(__dirname, "vendedores.json");
 const leadsFile = path.join(__dirname, "leads.json");
 const filaFile = path.join(__dirname, "fila.json");
-
-/* =========================
-   BANCO DE DADOS
-========================= */
-
-const sqlConfig = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT || 1433),
-  database: process.env.DB_NAME,
-  options: {
-    encrypt: String(process.env.DB_ENCRYPT || "true") === "true",
-    trustServerCertificate: String(process.env.DB_TRUST_CERT || "true") === "true"
-  },
-  pool: {
-    max: 10,
-    min: 0,
-    idleTimeoutMillis: 30000
-  }
-};
-
-let poolPromise = null;
-
-function getDbPool() {
-  if (!poolPromise) {
-    poolPromise = sql.connect(sqlConfig);
-  }
-  return poolPromise;
-}
-
-async function queryProductsView() {
-  const pool = await getDbPool();
-
-  const query = `
-    SELECT
-      id_produto,
-      codigo_produto,
-      nome_produto,
-      descricao,
-      categoria,
-      preco,
-      preco_promocional,
-      estoque,
-      imagem_url,
-      ativo
-    FROM vw_produtos_catalogo
-  `;
-
-  const result = await pool.request().query(query);
-  return result.recordset || [];
-}
+const productsFile = path.join(__dirname, "products.json");
 
 /* =========================
    UTILITÁRIOS
@@ -126,14 +74,6 @@ function brl(value) {
   });
 }
 
-function parseBooleanLike(value) {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return value === 1;
-
-  const normalized = String(value || "").trim().toLowerCase();
-  return ["1", "true", "t", "sim", "s", "yes", "y", "ativo"].includes(normalized);
-}
-
 function sanitizeItems(items) {
   if (!Array.isArray(items)) return [];
 
@@ -145,7 +85,7 @@ function sanitizeItems(items) {
 
       return {
         id: item.id,
-        nome: String(item.name || item.nome || "Item sem nome").trim(),
+        nome: String(item.name || "Item sem nome").trim(),
         quantidade,
         preco_unitario: precoUnitario,
         subtotal: Number((quantidade * precoUnitario).toFixed(2))
@@ -156,36 +96,6 @@ function sanitizeItems(items) {
 function generateLeadId(existingLeads) {
   const nextNumber = (existingLeads?.length || 0) + 1;
   return `lead-${String(nextNumber).padStart(4, "0")}`;
-}
-
-function normalizeCatalogProduct(product) {
-  return {
-    id_produto: Number(product.id_produto),
-    codigo_produto: product.codigo_produto ?? "",
-    nome_produto: product.nome_produto ?? "",
-    descricao: product.descricao ?? "",
-    categoria: product.categoria ?? "Sem categoria",
-    preco: Number(product.preco || 0),
-    preco_promocional:
-      product.preco_promocional !== null &&
-      product.preco_promocional !== undefined &&
-      String(product.preco_promocional).trim() !== ""
-        ? Number(product.preco_promocional)
-        : null,
-    estoque: Number(product.estoque || 0),
-    imagem_url: product.imagem_url || "",
-    ativo: parseBooleanLike(product.ativo)
-  };
-}
-
-function isActiveProduct(product) {
-  return parseBooleanLike(product.ativo);
-}
-
-function hasPromotion(product) {
-  const preco = Number(product.preco || 0);
-  const promo = Number(product.preco_promocional || 0);
-  return promo > 0 && promo < preco;
 }
 
 /* =========================
@@ -202,7 +112,11 @@ function getLeadsData() {
 
 function getFilaData() {
   return readJson(filaFile, { ultimo_vendedor_id: 0 });
-  }
+}
+
+function getProductsData() {
+  return readJson(productsFile, []);
+}
 
 function saveLeadsData(data) {
   writeJson(leadsFile, data);
@@ -260,7 +174,7 @@ function getRecentLeadByPhone(phone) {
 
   const leadsData = getLeadsData();
   const now = Date.now();
-  const timeWindowMs = 30 * 60 * 1000;
+  const timeWindowMs = 30 * 60 * 1000; // 30 minutos
 
   const found = (leadsData.leads || [])
     .filter((lead) => normalizePhone(lead?.cliente?.telefone) === normalizedPhone)
@@ -388,28 +302,6 @@ app.get("/", (req, res) => {
   res.send("Backend de distribuição de leads online");
 });
 
-app.get("/health", async (req, res) => {
-  try {
-    const pool = await getDbPool();
-    await pool.request().query("SELECT 1 AS ok");
-
-    return res.json({
-      success: true,
-      api: "online",
-      database: "online"
-    });
-  } catch (error) {
-    console.error("ERRO EM /health:", error);
-
-    return res.status(500).json({
-      success: false,
-      api: "online",
-      database: "offline",
-      message: "Falha na conexão com o banco."
-    });
-  }
-});
-
 app.get("/vendedores", (req, res) => {
   const data = getVendedoresData();
 
@@ -430,45 +322,27 @@ app.get("/leads", (req, res) => {
 
 app.get("/api/products", (req, res) => {
   try {
-    const raw = fs.readFileSync(path.join(__dirname, "products.json"), "utf-8");
-    const data = JSON.parse(raw);
+    const products = getProductsData();
 
-    const products = (data.products || [])
-      .filter(p => Number(p.ativo) === 1)
-      .map(p => ({
-        id: p.id_produto,
-        name: p.nome_produto,
-        category: p.categoria,
-        brand: p.marca || "Genérico",
-        saleFormat: "Unidade",
-        installmentsNoInterest: true,
-        flashOffer: false,
-        price: p.preco_promocional || p.preco,
-        oldPrice: p.preco_promocional ? p.preco : null,
-        offPct: p.preco_promocional
-          ? Math.round(((p.preco - p.preco_promocional) / p.preco) * 100)
-          : 0,
-        image: p.imagem_url || "./assets/placeholder.png",
-        estoque: p.estoque
-      }));
-
-    res.json(products);
-
+    res.json({
+      success: true,
+      total: products.length,
+      products
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao carregar produtos" });
+    console.error("ERRO EM /api/products:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Erro ao carregar produtos."
+    });
   }
 });
 
-app.get("/api/products/featured", async (req, res) => {
+app.get("/api/products/featured", (req, res) => {
   try {
-    const products = await queryProductsView();
-
-    const featuredProducts = products
-      .map(normalizeCatalogProduct)
-      .filter((product) => isActiveProduct(product))
-      .filter((product) => hasPromotion(product))
-      .slice(0, 12);
+    const products = getProductsData();
+    const featuredProducts = products.filter((product) => product.featured === true);
 
     res.json({
       success: true,
@@ -485,17 +359,14 @@ app.get("/api/products/featured", async (req, res) => {
   }
 });
 
-app.get("/api/products/category/:category", async (req, res) => {
-    try {
+app.get("/api/products/category/:category", (req, res) => {
+  try {
+    const products = getProductsData();
     const categoryParam = String(req.params.category || "").trim().toLowerCase();
-    const products = await queryProductsView();
 
-    const filteredProducts = products
-      .map(normalizeCatalogProduct)
-      .filter((product) => isActiveProduct(product))
-      .filter(
-        (product) => String(product.categoria || "").trim().toLowerCase() === categoryParam
-      );
+    const filteredProducts = products.filter(
+      (product) => String(product.category || "").trim().toLowerCase() === categoryParam
+    );
 
     res.json({
       success: true,
@@ -512,34 +383,28 @@ app.get("/api/products/category/:category", async (req, res) => {
   }
 });
 
-app.get("/api/products/search", async (req, res) => {
-  try {      
+app.get("/api/products/search", (req, res) => {
+  try {
+    const products = getProductsData();
     const query = String(req.query.q || "").trim().toLowerCase();
-    const products = await queryProductsView();
-
-    const normalizedProducts = products
-      .map(normalizeCatalogProduct)
-      .filter((product) => isActiveProduct(product));
 
     if (!query) {
       return res.json({
         success: true,
-        total: normalizedProducts.length,
-        products: normalizedProducts
+        total: products.length,
+        products
       });
     }
 
-    const filteredProducts = normalizedProducts.filter((product) => {
-      const nome = String(product.nome_produto || "").toLowerCase();
-      const categoria = String(product.categoria || "").toLowerCase();
-      const descricao = String(product.descricao || "").toLowerCase();
-      const codigo = String(product.codigo_produto || "").toLowerCase();
+    const filteredProducts = products.filter((product) => {
+      const name = String(product.name || "").toLowerCase();
+      const category = String(product.category || "").toLowerCase();
+      const description = String(product.description || "").toLowerCase();
 
       return (
-        nome.includes(query) ||
-        categoria.includes(query) ||
-        descricao.includes(query) ||
-        codigo.includes(query)
+        name.includes(query) ||
+        category.includes(query) ||
+        description.includes(query)
       );
     });
 
