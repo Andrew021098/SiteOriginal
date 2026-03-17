@@ -29,7 +29,11 @@ const CATEGORIES = [
 
 let PRODUCTS = [];
 
-const API_BASE_URL = "https://sitecondebonfim.onrender.com";
+const API_BASE_URL =
+  ["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? "http://localhost:3000"
+    : "https://sitecondebonfim.onrender.com";
+
 const PRODUCTS_ENDPOINT = `${API_BASE_URL}/api/products`;
 
 const BRANDS = [
@@ -120,6 +124,63 @@ function waLink(message) {
   return `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(message)}`;
 }
 
+function parseBooleanLike(value) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return ["1", "true", "t", "sim", "s", "yes", "y", "ativo"].includes(normalized);
+  }
+  return false;
+}
+
+function normalizeProduct(raw) {
+  const preco = Number(raw.preco || 0);
+  const precoPromocional =
+    raw.preco_promocional !== null &&
+    raw.preco_promocional !== undefined &&
+    String(raw.preco_promocional).trim() !== ""
+      ? Number(raw.preco_promocional)
+      : null;
+
+  const finalPrice =
+    precoPromocional !== null && precoPromocional > 0
+      ? precoPromocional
+      : preco;
+
+  const oldPrice =
+    precoPromocional !== null &&
+    precoPromocional > 0 &&
+    preco > precoPromocional
+      ? preco
+      : null;
+
+  const offPct =
+    oldPrice && oldPrice > finalPrice
+      ? Math.round(((oldPrice - finalPrice) / oldPrice) * 100)
+      : 0;
+
+  return {
+    id: Number(raw.id_produto),
+    codigo: raw.codigo_produto ?? "",
+    name: raw.nome_produto ?? "",
+    description: raw.descricao ?? "",
+    category: raw.categoria ?? "Sem categoria",
+    price: finalPrice,
+    oldPrice,
+    offPct,
+    estoque: Number(raw.estoque || 0),
+    image: raw.imagem_url || "./assets/product-placeholder.jpg",
+    ativo: parseBooleanLike(raw.ativo),
+    featured: false,
+    brand: raw.marca || "",
+    freeShip: false,
+    flashOffer: false,
+    saleFormat: "Unidade",
+    installmentsNoInterest: false
+  };
+}
+
 async function fetchProducts() {
   try {
     const response = await fetch(PRODUCTS_ENDPOINT);
@@ -134,20 +195,28 @@ async function fetchProducts() {
       throw new Error("Resposta inválida da API.");
     }
 
-    PRODUCTS = data.products;
+    PRODUCTS = data.products
+      .map(normalizeProduct)
+      .filter((product) => product.ativo && product.id && product.name);
 
-    window.dispatchEvent(new CustomEvent("cb:productsLoaded", {
-      detail: { products: PRODUCTS }
-    }));
+    sanitizeCartStock();
+
+    window.dispatchEvent(
+      new CustomEvent("cb:productsLoaded", {
+        detail: { products: PRODUCTS }
+      })
+    );
 
     return PRODUCTS;
   } catch (error) {
     console.error("Erro ao carregar produtos:", error);
     PRODUCTS = [];
 
-    window.dispatchEvent(new CustomEvent("cb:productsLoaded", {
-      detail: { products: PRODUCTS }
-    }));
+    window.dispatchEvent(
+      new CustomEvent("cb:productsLoaded", {
+        detail: { products: PRODUCTS }
+      })
+    );
 
     return [];
   }
@@ -183,9 +252,38 @@ function saveCart() {
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
-  window.dispatchEvent(new CustomEvent("cb:cartUpdated", {
-    detail: { count: cartCount(), subtotal: cartSubtotal() }
-  }));
+  window.dispatchEvent(
+    new CustomEvent("cb:cartUpdated", {
+      detail: { count: cartCount(), subtotal: cartSubtotal() }
+    })
+  );
+}
+
+function findProductById(id) {
+  return PRODUCTS.find((p) => Number(p.id) === Number(id));
+}
+
+function sanitizeCartStock() {
+  let changed = false;
+
+  cart.forEach((qty, id) => {
+    const product = findProductById(id);
+
+    if (!product || !product.ativo || product.estoque <= 0) {
+      cart.delete(id);
+      changed = true;
+      return;
+    }
+
+    if (qty > product.estoque) {
+      cart.set(id, product.estoque);
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    saveCart();
+  }
 }
 
 function cartCount() {
@@ -200,7 +298,7 @@ function cartSubtotal() {
   let total = 0;
 
   cart.forEach((qty, id) => {
-    const product = PRODUCTS.find((p) => Number(p.id) === Number(id));
+    const product = findProductById(id);
     if (product) total += Number(product.price || 0) * qty;
   });
 
@@ -211,7 +309,7 @@ function getCartItems() {
   const items = [];
 
   cart.forEach((qty, id) => {
-    const product = PRODUCTS.find((p) => Number(p.id) === Number(id));
+    const product = findProductById(id);
     if (product) {
       items.push({ product, qty });
     }
@@ -221,13 +319,35 @@ function getCartItems() {
 }
 
 function addToCart(id, delta = 1) {
-  const current = cart.get(id) || 0;
+  const product = findProductById(id);
+
+  if (!product) {
+    alert("Produto não encontrado.");
+    return;
+  }
+
+  if (!product.ativo) {
+    alert("Produto indisponível no momento.");
+    return;
+  }
+
+  if (product.estoque <= 0) {
+    alert("Produto sem estoque.");
+    return;
+  }
+
+  const current = cart.get(product.id) || 0;
   const next = Math.max(0, current + delta);
 
   if (next === 0) {
-    cart.delete(id);
+    cart.delete(product.id);
   } else {
-    cart.set(id, next);
+    if (next > product.estoque) {
+      alert(`Estoque disponível: ${product.estoque} unidade(s).`);
+      cart.set(product.id, product.estoque);
+    } else {
+      cart.set(product.id, next);
+    }
   }
 
   saveCart();
@@ -235,14 +355,33 @@ function addToCart(id, delta = 1) {
 }
 
 function setCartQuantity(id, quantity) {
-  const newQty = Math.max(1, quantity);
-  cart.set(id, newQty);
+  const product = findProductById(id);
+
+  if (!product) {
+    removeFromCart(id);
+    return;
+  }
+
+  if (product.estoque <= 0) {
+    alert("Produto sem estoque.");
+    removeFromCart(id);
+    return;
+  }
+
+  let newQty = Math.max(1, Number(quantity) || 1);
+
+  if (newQty > product.estoque) {
+    alert(`Estoque disponível: ${product.estoque} unidade(s).`);
+    newQty = product.estoque;
+  }
+
+  cart.set(product.id, newQty);
   saveCart();
   renderCart();
 }
 
 function removeFromCart(id) {
-  cart.delete(id);
+  cart.delete(Number(id));
   saveCart();
   renderCart();
 }
@@ -270,7 +409,7 @@ function closeDrawer() {
 }
 
 function getFilteredProducts() {
-  let result = [...PRODUCTS];
+  let result = [...PRODUCTS].filter((product) => product.ativo);
 
   if (activeCategory !== "Todos") {
     result = result.filter((product) => product.category === activeCategory);
@@ -280,7 +419,9 @@ function getFilteredProducts() {
     const term = searchTerm.toLowerCase();
     result = result.filter((product) =>
       String(product.name || "").toLowerCase().includes(term) ||
-      String(product.category || "").toLowerCase().includes(term)
+      String(product.category || "").toLowerCase().includes(term) ||
+      String(product.description || "").toLowerCase().includes(term) ||
+      String(product.codigo || "").toLowerCase().includes(term)
     );
   }
 
@@ -346,7 +487,11 @@ function renderCategories() {
 function productCard(product) {
   const hasOff = typeof product.offPct === "number" && product.offPct > 0;
   const hasOld = typeof product.oldPrice === "number" && product.oldPrice > product.price;
-  const brandLabel = product.brand ? `<div class="pCategory">${product.brand}</div>` : `<div class="pCategory">${product.category}</div>`;
+  const brandLabel = product.brand
+    ? `<div class="pCategory">${product.brand}</div>`
+    : `<div class="pCategory">${product.category}</div>`;
+
+  const isOutOfStock = Number(product.estoque || 0) <= 0;
 
   const card = document.createElement("div");
   card.className = "pCard";
@@ -354,6 +499,7 @@ function productCard(product) {
   card.innerHTML = `
     <div class="pImg" style="background-image:url('${product.image || "./assets/product-placeholder.jpg"}')">
       ${hasOff ? `<div class="badgeOff">${product.offPct}% OFF</div>` : ""}
+      ${isOutOfStock ? `<div class="badgeOff" style="top:auto; bottom:10px;">Sem estoque</div>` : ""}
     </div>
 
     <div class="pBody">
@@ -380,11 +526,15 @@ function productCard(product) {
           : ""
       }
 
+      <div style="font-size:12px; margin:8px 0 0; color:${isOutOfStock ? "#dc2626" : "#475569"};">
+        ${isOutOfStock ? "Indisponível" : `Estoque: ${product.estoque}`}
+      </div>
+
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:auto;">
         <button class="btn btn--outline productDetailsBtn" type="button">Ver detalhes</button>
-        <button class="addBtn" type="button">
+        <button class="addBtn" type="button" ${isOutOfStock ? "disabled" : ""}>
           <span aria-hidden="true">🛒</span>
-          Adicionar
+          ${isOutOfStock ? "Indisponível" : "Adicionar"}
         </button>
       </div>
     </div>
@@ -394,6 +544,7 @@ function productCard(product) {
   const detailsBtn = card.querySelector(".productDetailsBtn");
 
   addBtn.addEventListener("click", () => {
+    if (isOutOfStock) return;
     addToCart(product.id, 1);
     openDrawer();
   });
@@ -483,6 +634,7 @@ function renderCart() {
         <strong>${product.name}</strong>
         <span>${brl(product.price)} cada</span>
         <small class="cartItem__total">Total do item: ${brl(product.price * qty)}</small>
+        <small style="display:block; margin-top:4px; color:#64748b;">Estoque disponível: ${product.estoque}</small>
         <button type="button" class="removeItemBtn" aria-label="Remover produto">Remover</button>
       </div>
 
@@ -492,6 +644,7 @@ function renderCart() {
           type="number"
           class="qtyInput"
           min="1"
+          max="${product.estoque}"
           value="${qty}"
           aria-label="Quantidade"
         />
@@ -626,8 +779,8 @@ function buildCartWhatsAppMessage() {
     return null;
   }
 
-  const lines = getCartItems().map(({ product, qty }) =>
-    `• ${qty}x ${product.name} — ${brl(product.price * qty)}`
+  const lines = getCartItems().map(
+    ({ product, qty }) => `• ${qty}x ${product.name} — ${brl(product.price * qty)}`
   );
 
   return `Olá! Vim pelo site da ${STORE.name}.
@@ -746,7 +899,7 @@ function setupDrawer() {
 }
 
 function openProductModal(productId) {
-  const product = PRODUCTS.find((p) => p.id === productId);
+  const product = findProductById(productId);
   const modal = document.getElementById("productModal");
 
   if (!product || !modal) return;
@@ -760,6 +913,8 @@ function openProductModal(productId) {
   const modalQtyInput = document.getElementById("modalQtyInput");
   const oldPriceEl = document.getElementById("modalProductOldPrice");
   const imageEl = document.getElementById("modalProductImage");
+  const addBtn = document.getElementById("modalAddToCart");
+  const buyNowBtn = document.getElementById("modalBuyNow");
 
   if (modalProductName) modalProductName.textContent = product.name;
   if (modalProductCategory) modalProductCategory.textContent = product.category;
@@ -767,7 +922,10 @@ function openProductModal(productId) {
   if (modalProductDescription) {
     modalProductDescription.textContent = product.description || "Produto sem descrição.";
   }
-  if (modalQtyInput) modalQtyInput.value = "1";
+  if (modalQtyInput) {
+    modalQtyInput.value = "1";
+    modalQtyInput.max = String(product.estoque || 1);
+  }
 
   if (oldPriceEl) {
     if (typeof product.oldPrice === "number" && product.oldPrice > product.price) {
@@ -780,6 +938,9 @@ function openProductModal(productId) {
   if (imageEl) {
     imageEl.style.backgroundImage = `url('${product.image || "./assets/product-placeholder.jpg"}')`;
   }
+
+  if (addBtn) addBtn.disabled = product.estoque <= 0;
+  if (buyNowBtn) buyNowBtn.disabled = product.estoque <= 0;
 
   modal.classList.add("is-open");
   modal.setAttribute("aria-hidden", "false");
@@ -809,6 +970,9 @@ function updateModalTotal() {
 
   let qty = parseInt(qtyInput.value, 10);
   if (Number.isNaN(qty) || qty < 1) qty = 1;
+  if (qty > currentModalProduct.estoque) qty = currentModalProduct.estoque || 1;
+
+  qtyInput.value = String(qty);
 
   const total = currentModalProduct.price * qty;
 
@@ -842,16 +1006,24 @@ function setupProductModal() {
 
   if (plusBtn) {
     plusBtn.addEventListener("click", () => {
+      if (!currentModalProduct) return;
       let value = parseInt(qtyInput.value, 10) || 1;
       value += 1;
+      if (value > currentModalProduct.estoque) {
+        value = currentModalProduct.estoque;
+      }
       qtyInput.value = value;
       updateModalTotal();
     });
   }
 
   function normalizeModalQty() {
+    if (!currentModalProduct) return 1;
+
     let value = parseInt(qtyInput.value, 10);
     if (Number.isNaN(value) || value < 1) value = 1;
+    if (value > currentModalProduct.estoque) value = currentModalProduct.estoque || 1;
+
     qtyInput.value = value;
     updateModalTotal();
     return value;
@@ -874,6 +1046,7 @@ function setupProductModal() {
   if (addBtn) {
     addBtn.addEventListener("click", () => {
       if (!currentModalProduct) return;
+      if (currentModalProduct.estoque <= 0) return;
 
       const quantity = normalizeModalQty();
       addToCart(currentModalProduct.id, quantity);
@@ -885,6 +1058,7 @@ function setupProductModal() {
   if (buyNowBtn) {
     buyNowBtn.addEventListener("click", () => {
       if (!currentModalProduct) return;
+      if (currentModalProduct.estoque <= 0) return;
 
       const quantity = normalizeModalQty();
       addToCart(currentModalProduct.id, quantity);
@@ -895,7 +1069,7 @@ function setupProductModal() {
 }
 
 function getCatalogFilteredProducts() {
-  let products = [...PRODUCTS];
+  let products = [...PRODUCTS].filter((product) => product.ativo);
 
   const selectedCategory =
     document.querySelector('input[name="categoryFilter"]:checked')?.value || "Todos";
@@ -922,14 +1096,12 @@ function getCatalogFilteredProducts() {
   }
 
   if (catalogFilters.brands.length) {
-    products = products.filter((product) =>
-      catalogFilters.brands.includes(product.brand)
-    );
+    products = products.filter((product) => catalogFilters.brands.includes(product.brand));
   }
 
   if (catalogFilters.saleFormat !== "Todos") {
-    products = products.filter((product) =>
-      (product.saleFormat || "Unidade") === catalogFilters.saleFormat
+    products = products.filter(
+      (product) => (product.saleFormat || "Unidade") === catalogFilters.saleFormat
     );
   }
 
@@ -1151,8 +1323,11 @@ async function init() {
   if (products.length) {
     renderAllSections();
     setupCatalog();
+    renderCart();
   } else {
     console.error("Nenhum produto carregado.");
+    renderAllSections();
+    setupCatalog();
   }
 
   if (localStorage.getItem("openCart") === "true") {
