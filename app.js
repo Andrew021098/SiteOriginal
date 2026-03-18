@@ -282,7 +282,7 @@ function getFilteredProducts() {
     result = result.filter((product) => {
       const name = normalizeText(product.name);
       const category = normalizeText(product.category);
-      const brand = normalizeText(product.brand);
+      "const brand = normalizeText(product.brand);"
       const description = normalizeText(product.description);
 
       return (
@@ -570,6 +570,12 @@ function setupSearch() {
     suggestionsBox.style.display = "none";
   }
 
+  function applySearchAndRender() {
+    searchTerm = input.value.trim();
+    renderAllSections();
+    renderCatalog();
+  }
+
   function renderSuggestions(term) {
     if (!suggestionsBox) return;
 
@@ -611,33 +617,54 @@ function setupSearch() {
         const selectedName = item.dataset.name || "";
         input.value = selectedName;
         searchTerm = selectedName;
+
         renderAllSections();
+        renderCatalog();
         hideSuggestions();
-        document.getElementById("ofertas")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
+
+        const catalogGrid = document.getElementById("catalogGrid");
+        const offersSection = document.getElementById("ofertas");
+
+        if (catalogGrid) {
+          catalogGrid.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        } else if (offersSection) {
+          offersSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        }
       });
     });
   }
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    searchTerm = input.value.trim();
-    renderAllSections();
+    applySearchAndRender();
     hideSuggestions();
 
-    document.getElementById("ofertas")?.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
+    const catalogGrid = document.getElementById("catalogGrid");
+    const offersSection = document.getElementById("ofertas");
+
+    if (catalogGrid) {
+      catalogGrid.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    } else if (offersSection) {
+      offersSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
   });
 
   let debounceTimer;
 
   input.addEventListener("input", () => {
-    searchTerm = input.value.trim();
-    renderAllSections();
+    applySearchAndRender();
 
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
@@ -1003,6 +1030,24 @@ function getCatalogFilteredProducts() {
     products = products.filter((product) => product.category === selectedCategory);
   }
 
+  if (searchTerm.trim()) {
+    const term = normalizeText(searchTerm);
+
+    products = products.filter((product) => {
+      const name = normalizeText(product.name);
+      const category = normalizeText(product.category);
+      const brand = normalizeText(product.brand);
+      const description = normalizeText(product.description);
+
+      return (
+        name.includes(term) ||
+        category.includes(term) ||
+        brand.includes(term) ||
+        description.includes(term)
+      );
+    });
+  }
+
   if (catalogFilters.minPrice !== null) {
     products = products.filter((product) => Number(product.price || 0) >= catalogFilters.minPrice);
   }
@@ -1171,11 +1216,15 @@ function setupCatalog() {
   const sortSelect = document.getElementById("catalogSort");
 
   categoryInputs.forEach((input) => {
-    input.addEventListener("change", renderCatalog);
+    input.addEventListener("change", () => {
+      renderCatalog();
+    });
   });
 
   if (sortSelect) {
-    sortSelect.addEventListener("change", renderCatalog);
+    sortSelect.addEventListener("change", () => {
+      renderCatalog();
+    });
   }
 
   setupAdvancedCatalogFilters();
