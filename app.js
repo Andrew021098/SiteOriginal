@@ -1274,8 +1274,6 @@ async function init() {
   exposeAppApi();
 
   loadCart();
-  renderBrands();
-  renderCart();
   setupSearch();
   setupSort();
   setupWhatsApp();
@@ -1285,10 +1283,13 @@ async function init() {
   const products = await fetchProducts();
 
   if (products.length) {
+    renderBrands();
     renderAllSections();
     setupCatalog();
+    renderCart();
   } else {
     console.error("Nenhum produto carregado.");
+    renderCart();
   }
 
   if (localStorage.getItem("openCart") === "true") {
