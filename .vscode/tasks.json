@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "sqlproj: Build BANCOSQL",
+			"type": "process",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"c:/site/condedebonfim/BANCOSQL/BANCOSQL.sqlproj"
+			],
+			"problemMatcher": "$sqlproj-problem-matcher",
+			"isBackground": true,
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "Builds the BANCOSQL SQL project"
+		}
+	]
+}

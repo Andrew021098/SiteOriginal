@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "mssql": "^12.2.0"
+    "mssql": "^12.2.0",
+    "node-firebird": "^2.0.2",
+    "sqlite3": "^6.0.1"
   }
 }

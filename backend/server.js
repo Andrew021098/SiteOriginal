@@ -1,3 +1,16 @@
+const Firebird = require("node-firebird");
+
+const dbOptions = {
+  host: "127.0.0.1", // ou IP do servidor
+  port: 3050,
+  database: "C:\\caminho\\do\\seu\\banco.fdb", // ⚠️ AJUSTAR
+  user: "SYSDBA",
+  password: "masterkey",
+  lowercase_keys: true,
+  role: null,
+  pageSize: 4096
+};
+
 require("dotenv").config();
 
 const express = require("express");
@@ -321,22 +334,68 @@ app.get("/leads", (req, res) => {
 });
 
 app.get("/api/products", (req, res) => {
-  try {
-    const products = getProductsData();
+  Firebird.attach(dbOptions, (err, db) => {
+    if (err) {
+      console.error("Erro conexão Firebird:", err);
+      return res.status(500).json({ success: false });
+    }
 
-    res.json({
-      success: true,
-      total: products.length,
-      products
-    });
-  } catch (error) {
-    console.error("ERRO EM /api/products:", error);
+    const query = `
+      SELECT
+        ID,
+        NAME,
+        IMAGE,
+        DESCRIPTION,
+        CATEGORY,
+        STOCK,
+        PRICE,
+        PROMO_PRICE
+      FROM BANCOSQL
+    `;
 
-    res.status(500).json({
-      success: false,
-      message: "Erro ao carregar produtos."
+    db.query(query, (err, result) => {
+      db.detach();
+
+      if (err) {
+        console.error("Erro query:", err);
+        return res.status(500).json({ success: false });
+      }
+
+      const products = result.map((row) => {
+        const price = Number(row.price || 0);
+        const promo = Number(row.promo_price || 0);
+
+        let finalPrice = price;
+        let oldPrice = null;
+        let offPct = null;
+
+        if (promo && promo < price) {
+          finalPrice = promo;
+          oldPrice = price;
+          offPct = Math.round(((price - promo) / price) * 100);
+        }
+
+        return {
+          id: row.id,
+          name: row.name,
+          category: row.category,
+          price: finalPrice,
+          oldPrice,
+          offPct,
+          freeShip: false,
+          image: row.image,
+          featured: false,
+          description: row.description
+        };
+      });
+
+      res.json({
+        success: true,
+        total: products.length,
+        products
+      });
     });
-  }
+  });
 });
 
 app.get("/api/products/featured", (req, res) => {
