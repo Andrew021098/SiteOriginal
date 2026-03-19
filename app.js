@@ -376,18 +376,7 @@ function productCard(product) {
       </div>
 
       ${
-        product.freeShip
-          ? `
-          <div class="shipFree">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-              <circle cx="7" cy="19" r="1.5" fill="none" stroke="currentColor" stroke-width="2"/>
-              <circle cx="17" cy="19" r="1.5" fill="none" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            Frete Grátis
-          </div>
-        `
-          : ""
+        ""
       }
 
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:auto;">
