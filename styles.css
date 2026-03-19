@@ -379,9 +379,10 @@ textarea{font-family:inherit}
 .sortBox select{
   padding:10px 12px;
   border-radius:10px;
-  border:1px solid var(--line);
-  background:#fff;
+  border:1px solid var(--yellow);
+  background: var(--yellow);
   outline:none;
+  box-shadow: #00000046 0px 0px 8px 0px;
 }
 
 /* categories */
@@ -441,7 +442,7 @@ textarea{font-family:inherit}
   border:1px solid var(--line);
   border-radius:14px;
   overflow:hidden;
-  box-shadow:0 8px 26px rgba(16,24,40,.06);
+  box-shadow:0 0px 10px rgb(0 0 0 / 20%);
   display:flex;
   flex-direction:column;
 }
@@ -696,9 +697,10 @@ textarea{font-family:inherit}
   display:flex;
   justify-content:flex-end;
   padding:16px;
-  background:#f8faff;
+  background:#ffffff;
   border:1px solid var(--line);
   border-radius:14px;
+  box-shadow: 0 0px 18px rgba(121, 121, 121, 0.4);
 }
 
 /* checkout */
@@ -1733,19 +1735,28 @@ textarea{font-family:inherit}
 }
 
 .filterSection{
-  background:#fff;
+  background:#ffffff;
   border:1px solid var(--line);
   border-radius:14px;
   padding:18px 16px;
   margin-bottom:14px;
-  box-shadow:0 6px 18px rgba(16,24,40,.04);
+  box-shadow: 0 0px 18px rgba(121, 121, 121, 0.4);
+}
+
+.filterSectioninter{
+  background:#ffffff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px 16px;
+  margin-bottom:14px;
+  box-shadow: 0 0px 18px rgba(121, 121, 121, 0.0);
 }
 
 .filterSection__title{
   margin:0 0 14px;
   font-size:16px;
   font-weight:800;
-  color:#111827;
+  color:#1052e0;
 }
 
 .filterLinkItem,
