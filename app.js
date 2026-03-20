@@ -166,14 +166,14 @@ async function fetchProductsPage(page = 1, limit = 100) {
 
     const data = await response.json();
 
-    if (!data.success || !Array.isArray(data.products)) {
-      throw new Error("Resposta inválida da API.");
-    }
+    const products = Array.isArray(data.products) ? data.products : [];
 
     return {
-      products: data.products,
-      hasMore: Boolean(data.hasMore),
-      total: Number(data.total || 0),
+      products,
+      hasMore: typeof data.hasMore === "boolean"
+        ? data.hasMore
+        : products.length >= limit,
+      total: Number(data.total || products.length || 0),
       page: Number(data.page || page),
       limit: Number(data.limit || limit)
     };
@@ -191,6 +191,8 @@ async function fetchProductsPage(page = 1, limit = 100) {
 
 async function fetchProducts() {
   const firstPage = await fetchProductsPage(1, 300);
+
+  console.log("fetchProducts ->", firstPage);
 
   PRODUCTS = firstPage.products || [];
 
@@ -219,6 +221,7 @@ async function loadCatalogPage(reset = false) {
   renderCatalog();
 
   const result = await fetchProductsPage(catalogPage, catalogLimit);
+  console.log("loadCatalogPage ->", result);
 
   if (reset) {
     catalogLoadedProducts = [...result.products];
@@ -1488,12 +1491,16 @@ async function init() {
   } else {
     const products = await fetchProducts();
 
+    console.log("HOME PRODUCTS ->", products);
+
     if (products.length) {
       renderBrands();
       renderAllSections();
       renderCart();
     } else {
       console.error("Nenhum produto carregado.");
+      renderBrands();
+      renderAllSections();
       renderCart();
     }
   }
