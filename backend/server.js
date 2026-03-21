@@ -297,71 +297,32 @@ app.get("/api/products", (req, res) => {
 
 app.get("/api/products-db", async (req, res) => {
   try {
-    const page = Math.max(1, Number(req.query.page || 1));
-    const limit = Math.max(1, Number(req.query.limit || 100));
-    const offset = (page - 1) * limit;
-
-    const search = String(req.query.search || "").trim();
-    const category = String(req.query.category || "").trim();
-
-    const baseUrl = getBaseUrl(req);
-
-    const where = [];
-    
-    if (search) {
-      const safeSearch = search.replace(/'/g, "''");
-      where.push(`UPPER(NAME) CONTAINING UPPER('${safeSearch}')`);
-    }
-
-    if (category && category !== "Todos") {
-      const safeCategory = category.replace(/'/g, "''");
-      where.push(`UPPER(CATEGORY) = UPPER('${safeCategory}')`);
-    }
-
-    const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
+    // tenta Firebird
     const rows = await queryFirebird(`
-      SELECT
-        ID,
-        NAME,
-        IMAGE,
-        DESCRIPTION,
-        CATEGORY,
-        STOCK,
-        PRICE,
-        PROMO_PRICE
+      SELECT ID, NAME, IMAGE, DESCRIPTION, CATEGORY, STOCK, PRICE, PROMO_PRICE
       FROM BANCOSQL
-      ${whereSql}
-      ORDER BY NAME
-      ROWS ${offset + 1} TO ${offset + limit}
+      ROWS 1 TO 100
     `);
 
-    const countRows = await queryFirebird(`
-      SELECT COUNT(*) AS TOTAL
-      FROM BANCOSQL
-      ${whereSql}
-    `);
-
-    const total = Number(countRows?.[0]?.total || 0);
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
     const products = mapDbProducts(rows, baseUrl);
 
-    res.json({
+    return res.json({
       success: true,
       source: "firebird",
-      page,
-      limit,
-      total,
-      hasMore: offset + products.length < total,
-      search,
-      category,
       products
     });
+
   } catch (error) {
-    console.error("Erro em /api/products-db:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erro ao carregar produtos do Firebird.",
-      details: String(error.message || error)
+    console.error("🔥 Firebird caiu, usando JSON:", error.message);
+
+    // fallback JSON
+    const products = getProductsData();
+
+    return res.json({
+      success: true,
+      source: "json-fallback",
+      products
     });
   }
 });
