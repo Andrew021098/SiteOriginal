@@ -3,7 +3,7 @@ CONFIGURAÇÃO
 ================================ */
 
 const ATIVAR_PAGAMENTO = false;
-const BACKEND_URL = "https://sitecondebonfim.onrender.com";
+const BACKEND_URL = "https://condedebonfim2103.onrender.com";
 const CHECKOUT_ONLINE_ATIVO = false;
 
 /* ================================
