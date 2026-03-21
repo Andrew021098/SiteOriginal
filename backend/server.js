@@ -29,7 +29,7 @@ const dbOptions = {
 const REUTILIZAR_MESMO_VENDEDOR = false;
 
 app.use(cors({
-  origin: "*",
+  origin: "https://sitecondebonfim.onrender.com",
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"]
 }));
