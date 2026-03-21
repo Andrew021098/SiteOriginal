@@ -14,11 +14,11 @@ const PORT = process.env.PORT || 3000;
 ========================= */
 
 const dbOptions = {
-  host: "192.168.88.247",
-  port: 3050,
-  database: "/opt/firebird/bancos/MIAUTOMEC.FDB",
-  user: "SYSDBA",
-  password: "masterkey",
+  host: process.env.FIREBIRD_HOST || "192.168.88.247",
+  port: Number(process.env.FIREBIRD_PORT || 3050),
+  database: process.env.FIREBIRD_DATABASE || "/opt/firebird/bancos/MIAUTOMEC.FDB",
+  user: process.env.FIREBIRD_USER || "SYSDBA",
+  password: process.env.FIREBIRD_PASSWORD || "masterkey",
   lowercase_keys: true
 };
 
@@ -35,6 +35,12 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+/* =========================
+   ARQUIVOS ESTÁTICOS
+========================= */
+
+app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 const vendedoresFile = path.join(__dirname, "vendedores.json");
 const leadsFile = path.join(__dirname, "leads.json");
@@ -80,14 +86,27 @@ function sanitizeItems(items) {
   if (!Array.isArray(items)) return [];
 
   return items
-    .filter(item => item && Number(item.qty) > 0 && Number(item.price) > 0)
-    .map(item => ({
+    .filter((item) => item && Number(item.qty) > 0 && Number(item.price) > 0)
+    .map((item) => ({
       id: item.id,
       nome: String(item.name || "").trim(),
       quantidade: Number(item.qty),
       preco_unitario: Number(item.price),
       subtotal: Number((Number(item.qty) * Number(item.price)).toFixed(2))
     }));
+}
+
+function getBaseUrl(req) {
+  const envBaseUrl = process.env.BASE_URL;
+  if (envBaseUrl) {
+    return envBaseUrl.replace(/\/$/, "");
+  }
+
+  return `${req.protocol}://${req.get("host")}`;
+}
+
+function safeFileName(filePathValue) {
+  return String(filePathValue || "").split(/[/\\]/).pop();
 }
 
 /* =========================
@@ -123,7 +142,7 @@ function saveFilaData(data) {
 ========================= */
 
 function getActiveVendedores() {
-  return (getVendedoresData().vendedores || []).filter(v => v.ativo);
+  return (getVendedoresData().vendedores || []).filter((v) => v.ativo);
 }
 
 function pickNextVendedor() {
@@ -132,8 +151,13 @@ function pickNextVendedor() {
 
   if (!vendedores.length) return null;
 
-  const index = vendedores.findIndex(v => Number(v.id) === Number(fila.ultimo_vendedor_id));
-  const next = index === -1 ? vendedores[0] : vendedores[(index + 1) % vendedores.length];
+  const index = vendedores.findIndex(
+    (v) => Number(v.id) === Number(fila.ultimo_vendedor_id)
+  );
+
+  const next = index === -1
+    ? vendedores[0]
+    : vendedores[(index + 1) % vendedores.length];
 
   saveFilaData({ ultimo_vendedor_id: next.id });
   return next;
@@ -163,7 +187,7 @@ function queryFirebird(sql) {
   });
 }
 
-function mapDbProducts(rows) {
+function mapDbProducts(rows, baseUrl) {
   return rows.map((row) => {
     const price = Number(row.price || 0);
     const promo = Number(row.promo_price || 0);
@@ -178,19 +202,26 @@ function mapDbProducts(rows) {
       offPct = Math.round(((price - promo) / price) * 100);
     }
 
+    const imageFile = safeFileName(row.image);
+    const imageUrl = imageFile
+      ? `${baseUrl}/assets/produtos/${imageFile}`
+      : `${baseUrl}/assets/no-image.jpg`;
+
     return {
       id: row.id,
-      name: row.name,
-      category: row.category,
+      name: row.name || "Produto sem nome",
+      category: row.category || "Sem categoria",
+      brand: row.brand || "",
+      saleFormat: row.sale_format || "Unidade",
+      installmentsNoInterest: Boolean(row.installments_no_interest),
+      flashOffer: Boolean(row.flash_offer),
       price: finalPrice,
       oldPrice,
       offPct,
       freeShip: false,
-      image: row.image
-        ? `/assets/produtos/${String(row.image).split("\\").pop()}`
-        : "/assets/no-image.jpg",
+      image: imageUrl,
       featured: false,
-      description: row.description,
+      description: row.description || "Produto sem descrição.",
       stock: Number(row.stock || 0)
     };
   });
@@ -223,18 +254,33 @@ app.get("/leads", (req, res) => {
 });
 
 /* =========================
-   PRODUTOS JSON (SITE SEGUE FUNCIONANDO)
+   PRODUTOS JSON
 ========================= */
 
 app.get("/api/products", (req, res) => {
   try {
     const products = getProductsData();
+    const baseUrl = getBaseUrl(req);
+
+    const normalizedProducts = products.map((product) => {
+      const imageFile = safeFileName(product.image);
+      const isAbsolute = /^https?:\/\//i.test(String(product.image || ""));
+
+      return {
+        ...product,
+        image: isAbsolute
+          ? product.image
+          : imageFile
+          ? `${baseUrl}/assets/produtos/${imageFile}`
+          : `${baseUrl}/assets/no-image.jpg`
+      };
+    });
 
     res.json({
       success: true,
       source: "json",
-      total: products.length,
-      products
+      total: normalizedProducts.length,
+      products: normalizedProducts
     });
   } catch (error) {
     console.error("Erro em /api/products:", error);
@@ -246,7 +292,7 @@ app.get("/api/products", (req, res) => {
 });
 
 /* =========================
-   PRODUTOS FIREBIRD (TESTE)
+   PRODUTOS FIREBIRD
 ========================= */
 
 app.get("/api/products-db", async (req, res) => {
@@ -254,6 +300,25 @@ app.get("/api/products-db", async (req, res) => {
     const page = Math.max(1, Number(req.query.page || 1));
     const limit = Math.max(1, Number(req.query.limit || 100));
     const offset = (page - 1) * limit;
+
+    const search = String(req.query.search || "").trim();
+    const category = String(req.query.category || "").trim();
+
+    const baseUrl = getBaseUrl(req);
+
+    const where = [];
+    
+    if (search) {
+      const safeSearch = search.replace(/'/g, "''");
+      where.push(`UPPER(NAME) CONTAINING UPPER('${safeSearch}')`);
+    }
+
+    if (category && category !== "Todos") {
+      const safeCategory = category.replace(/'/g, "''");
+      where.push(`UPPER(CATEGORY) = UPPER('${safeCategory}')`);
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
     const rows = await queryFirebird(`
       SELECT
@@ -266,6 +331,7 @@ app.get("/api/products-db", async (req, res) => {
         PRICE,
         PROMO_PRICE
       FROM BANCOSQL
+      ${whereSql}
       ORDER BY NAME
       ROWS ${offset + 1} TO ${offset + limit}
     `);
@@ -273,11 +339,11 @@ app.get("/api/products-db", async (req, res) => {
     const countRows = await queryFirebird(`
       SELECT COUNT(*) AS TOTAL
       FROM BANCOSQL
+      ${whereSql}
     `);
 
     const total = Number(countRows?.[0]?.total || 0);
-
-    const products = mapDbProducts(rows);
+    const products = mapDbProducts(rows, baseUrl);
 
     res.json({
       success: true,
@@ -286,6 +352,8 @@ app.get("/api/products-db", async (req, res) => {
       limit,
       total,
       hasMore: offset + products.length < total,
+      search,
+      category,
       products
     });
   } catch (error) {

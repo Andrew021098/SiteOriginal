@@ -28,7 +28,6 @@ const CATEGORIES = [
 ];
 
 let PRODUCTS = [];
-
 let offersLoadedProducts = [];
 let catalogLoadedProducts = [];
 
@@ -45,7 +44,11 @@ let offersHasMore = true;
 let isCatalogObserverStarted = false;
 let isOffersObserverStarted = false;
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "http://localhost:3000"; // mantém local por enquanto
+
 const PRODUCTS_ENDPOINT = `${API_BASE_URL}/api/products-db`;
 
 const BRANDS = [
@@ -156,29 +159,44 @@ function mergeProductsIntoStore(products) {
   PRODUCTS = Array.from(byId.values());
 }
 
-async function fetchProductsPage(page = 1, limit = 100) {
+async function fetchProductsPage(page = 1, limit = 100, extraFilters = {}) {
   try {
-    const response = await fetch(`${PRODUCTS_ENDPOINT}?page=${page}&limit=${limit}`);
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit)
+    });
+
+    if (extraFilters.search?.trim()) {
+      params.set("search", extraFilters.search.trim());
+    }
+
+    if (extraFilters.category?.trim() && extraFilters.category !== "Todos") {
+      params.set("category", extraFilters.category.trim());
+    }
+
+    const url = `${PRODUCTS_ENDPOINT}?${params.toString()}`;
+    console.log("🔥 Buscando:", url);
+
+    const response = await fetch(url);
 
     if (!response.ok) {
       throw new Error(`Erro HTTP: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log("📦 RESPOSTA API:", data);
 
     const products = Array.isArray(data.products) ? data.products : [];
 
     return {
       products,
-      hasMore: typeof data.hasMore === "boolean"
-        ? data.hasMore
-        : products.length >= limit,
-      total: Number(data.total || products.length || 0),
+      hasMore: typeof data.hasMore === "boolean" ? data.hasMore : products.length >= limit,
+      total: Number(data.total || 0),
       page: Number(data.page || page),
       limit: Number(data.limit || limit)
     };
   } catch (error) {
-    console.error("Erro ao carregar página de produtos:", error);
+    console.error("❌ Erro ao carregar página de produtos:", error);
     return {
       products: [],
       hasMore: false,
@@ -191,9 +209,6 @@ async function fetchProductsPage(page = 1, limit = 100) {
 
 async function fetchProducts() {
   const firstPage = await fetchProductsPage(1, 300);
-
-  console.log("fetchProducts ->", firstPage);
-
   PRODUCTS = firstPage.products || [];
 
   window.dispatchEvent(new CustomEvent("cb:productsLoaded", {
@@ -206,13 +221,16 @@ async function fetchProducts() {
 async function loadCatalogPage(reset = false) {
   if (catalogLoading) return;
 
+  const selectedCategory =
+    document.querySelector('input[name="categoryFilter"]:checked')?.value || "Todos";
+
   if (reset) {
     catalogPage = 1;
     catalogHasMore = true;
     catalogLoadedProducts = [];
   }
 
-  if (!catalogHasMore) {
+  if (!catalogHasMore && !reset) {
     renderCatalog();
     return;
   }
@@ -220,8 +238,10 @@ async function loadCatalogPage(reset = false) {
   catalogLoading = true;
   renderCatalog();
 
-  const result = await fetchProductsPage(catalogPage, catalogLimit);
-  console.log("loadCatalogPage ->", result);
+  const result = await fetchProductsPage(catalogPage, catalogLimit, {
+    search: searchTerm,
+    category: selectedCategory
+  });
 
   if (reset) {
     catalogLoadedProducts = [...result.products];
@@ -235,7 +255,7 @@ async function loadCatalogPage(reset = false) {
   catalogPage += 1;
   catalogLoading = false;
 
-  renderCatalog();
+  renderCatalog(result.total);
 }
 
 async function loadOffersPage(reset = false) {
@@ -247,7 +267,7 @@ async function loadOffersPage(reset = false) {
     offersLoadedProducts = [];
   }
 
-  if (!offersHasMore) {
+  if (!offersHasMore && !reset) {
     renderOffersInfinite();
     return;
   }
@@ -265,7 +285,18 @@ async function loadOffersPage(reset = false) {
 
   mergeProductsIntoStore(result.products);
 
-  offersHasMore = result.hasMore;
+  const promoCount = offersLoadedProducts.filter(
+    (product) => Number(product.offPct || 0) > 0
+  ).length;
+
+  const maxOffersPages = 3;
+
+  if (promoCount >= 8 || offersPage >= maxOffersPages || !result.hasMore) {
+    offersHasMore = false;
+  } else {
+    offersHasMore = true;
+  }
+
   offersPage += 1;
   offersLoading = false;
 
@@ -340,14 +371,38 @@ function getCartItems() {
 }
 
 function addToCart(id, delta = 1) {
-  const current = cart.get(id) || 0;
+  const normalizedId = Number(id);
+  const current = cart.get(normalizedId) || 0;
   const next = Math.max(0, current + delta);
 
   if (next === 0) {
-    cart.delete(id);
+    cart.delete(normalizedId);
   } else {
-    cart.set(id, next);
+    cart.set(normalizedId, next);
   }
+
+  saveCart();
+  renderCart();
+}
+
+function setCartQuantity(id, quantity) {
+  const normalizedId = Number(id);
+  const newQty = Math.max(1, Number(quantity) || 1);
+
+  cart.set(normalizedId, newQty);
+  saveCart();
+  renderCart();
+}
+
+function removeFromCart(id) {
+  const normalizedId = Number(id);
+
+  console.log("Removendo ID:", id, "→ normalizado:", normalizedId);
+  console.log("Antes:", Array.from(cart.entries()));
+
+  cart.delete(normalizedId);
+
+  console.log("Depois:", Array.from(cart.entries()));
 
   saveCart();
   renderCart();
@@ -360,8 +415,17 @@ function setCartQuantity(id, quantity) {
   renderCart();
 }
 
-function removeFromCart(id) {
-  cart.delete(id);
+function addToCart(id, delta = 1) {
+  id = Number(id);
+  const current = cart.get(id) || 0;
+  const next = Math.max(0, current + delta);
+
+  if (next === 0) {
+    cart.delete(id);
+  } else {
+    cart.set(id, next);
+  }
+
   saveCart();
   renderCart();
 }
@@ -440,7 +504,9 @@ function getOfferProducts() {
 }
 
 function getFeaturedProducts() {
-  return getFilteredProducts().filter((product) => product.featured);
+  return getFilteredProducts()
+    .filter((product) => Number(product.offPct || 0) > 0)
+    .slice(0, 8);
 }
 
 function renderCategories() {
@@ -496,8 +562,6 @@ function productCard(product) {
         <div class="newPrice">${brl(product.price)}</div>
       </div>
 
-       ${""}
-
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:auto;">
         <button class="btn btn--outline productDetailsBtn" type="button">Ver detalhes</button>
         <button class="addBtn" type="button">
@@ -546,13 +610,14 @@ function renderOffersInfinite() {
   if (!grid) return;
 
   const promoProducts = [...offersLoadedProducts]
-    .filter((product) => typeof product.offPct === "number" && product.offPct > 0)
-    .sort((a, b) => Number(b.offPct || 0) - Number(a.offPct || 0));
+    .filter((product) => Number(product.offPct || 0) > 0)
+    .sort((a, b) => Number(b.offPct || 0) - Number(a.offPct || 0))
+    .slice(0, 8);
 
   grid.innerHTML = "";
 
   if (!promoProducts.length && !offersLoading) {
-    grid.innerHTML = `<div class="emptyState">Nenhuma oferta encontrada para esse filtro.</div>`;
+    grid.innerHTML = `<div class="emptyState">Nenhuma oferta encontrada no momento.</div>`;
   } else {
     promoProducts.forEach((product) => {
       grid.appendChild(productCard(product));
@@ -561,7 +626,11 @@ function renderOffersInfinite() {
 
   if (loader) {
     loader.style.display = offersHasMore || offersLoading ? "block" : "none";
-    loader.textContent = offersLoading ? "Carregando mais promoções..." : "Role para carregar mais";
+    loader.textContent = offersLoading
+      ? "Carregando ofertas..."
+      : offersHasMore
+      ? "Role para carregar mais"
+      : "Fim das ofertas";
   }
 }
 
@@ -806,7 +875,7 @@ function setupSearch() {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       renderSuggestions(input.value);
-    }, 120);
+    }, 300);
   });
 
   input.addEventListener("focus", () => {
@@ -820,12 +889,10 @@ function setupSearch() {
       hideSuggestions();
     }
   });
-
 }
 
 function setupSort() {
   const select = document.getElementById("sortSelect");
-  
   const catalogSort = document.getElementById("catalogSort");
 
   if (select) {
@@ -1160,32 +1227,7 @@ function setupProductModal() {
 
 function getCatalogFilteredProducts() {
   let products = [...catalogLoadedProducts];
-
-  const selectedCategory =
-    document.querySelector('input[name="categoryFilter"]:checked')?.value || "Todos";
   const selectedSort = document.getElementById("catalogSort")?.value || "default";
-
-  if (selectedCategory !== "Todos") {
-    products = products.filter((product) => product.category === selectedCategory);
-  }
-
-  if (searchTerm.trim()) {
-    const term = normalizeText(searchTerm);
-
-    products = products.filter((product) => {
-      const name = normalizeText(product.name);
-      const category = normalizeText(product.category);
-      const brand = normalizeText(product.brand);
-      const description = normalizeText(product.description);
-
-      return (
-        name.includes(term) ||
-        category.includes(term) ||
-        brand.includes(term) ||
-        description.includes(term)
-      );
-    });
-  }
 
   if (catalogFilters.minPrice !== null) {
     products = products.filter((product) => Number(product.price || 0) >= catalogFilters.minPrice);
@@ -1230,14 +1272,12 @@ function getCatalogFilteredProducts() {
     case "name-desc":
       products.sort((a, b) => String(b.name || "").localeCompare(String(a.name || "")));
       break;
-    default:
-      break;
   }
 
   return products;
 }
 
-function renderCatalog() {
+function renderCatalog(totalFromApi = null) {
   const grid = document.getElementById("catalogGrid");
   const count = document.getElementById("catalogCount");
   const loader = document.getElementById("catalogLoader");
@@ -1249,7 +1289,7 @@ function renderCatalog() {
   grid.innerHTML = "";
 
   if (count) {
-    count.textContent = String(products.length);
+    count.textContent = String(totalFromApi ?? products.length);
   }
 
   if (!products.length) {
@@ -1324,7 +1364,7 @@ function setupAdvancedCatalogFilters() {
   discountInputs.forEach((input) => {
     input.addEventListener("change", () => {
       catalogFilters.minDiscount = Number(input.value || 0);
-      loadCatalogPage(true);
+      renderCatalog();
     });
   });
 
@@ -1334,28 +1374,28 @@ function setupAdvancedCatalogFilters() {
         .filter((item) => item.checked)
         .map((item) => item.value);
 
-      loadCatalogPage(true);
+      renderCatalog();
     });
   });
 
   saleFormatInputs.forEach((input) => {
     input.addEventListener("change", () => {
       catalogFilters.saleFormat = input.value || "Todos";
-      loadCatalogPage(true);
+      renderCatalog();
     });
   });
 
   if (flashOfferInput) {
     flashOfferInput.addEventListener("change", () => {
       catalogFilters.flashOffer = flashOfferInput.checked;
-      loadCatalogPage(true);
+      renderCatalog();
     });
   }
 
   if (installmentsInput) {
     installmentsInput.addEventListener("change", () => {
       catalogFilters.installmentsNoInterest = installmentsInput.checked;
-      loadCatalogPage(true);
+      renderCatalog();
     });
   }
 
@@ -1377,7 +1417,7 @@ function setupAdvancedCatalogFilters() {
       if (priceMinInput) priceMinInput.value = catalogFilters.minPrice ?? "";
       if (priceMaxInput) priceMaxInput.value = catalogFilters.maxPrice ?? "";
 
-      loadCatalogPage(true);
+      renderCatalog();
     });
   });
 
@@ -1389,7 +1429,7 @@ function setupAdvancedCatalogFilters() {
       catalogFilters.minPrice = minRaw ? Number(minRaw) : null;
       catalogFilters.maxPrice = maxRaw ? Number(maxRaw) : null;
 
-      loadCatalogPage(true);
+      renderCatalog();
     });
   }
 }
@@ -1403,7 +1443,7 @@ function setupCatalog() {
 
   categoryInputs.forEach((input) => {
     input.addEventListener("change", () => {
-      loadCatalogPage(true);
+      renderCatalog();
     });
   });
 
@@ -1490,8 +1530,6 @@ async function init() {
     renderCart();
   } else {
     const products = await fetchProducts();
-
-    console.log("HOME PRODUCTS ->", products);
 
     if (products.length) {
       renderBrands();
