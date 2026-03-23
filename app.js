@@ -38,6 +38,19 @@ const BRANDS = [
   "Atlas"
 ];
 
+const CATEGORY_MAP = {
+  "Materiais de Construção": "METAIS",
+  "Cimento e Concreto": "CIMENTO",
+  "Blocos e Tijolos": "BLOCOS",
+  "Ferragens": "FERRAGENS",
+  "Materiais Elétricos": "MATERIAL ELETRICO",
+  "Materiais Hidráulicos": "VALVULA",
+  "Tintas e Acessórios": "TINTA",
+  "Ferramentas": "FERRAMENTAS",
+  "Portas e Janelas": "ALUMINIO",
+  "Banheiros e Acessórios": "VALVULA"
+};
+
 const API_BASE_URL =
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:3000"
@@ -189,7 +202,8 @@ async function fetchProductsPage(page = 1, limit = 100, extraFilters = {}) {
     }
 
     if (extraFilters.category?.trim() && extraFilters.category !== "Todos") {
-      params.set("category", extraFilters.category.trim());
+  const mappedCategory = CATEGORY_MAP[extraFilters.category] || extraFilters.category;
+  params.set("category", mappedCategory);
     }
 
     const url = `${PRODUCTS_ENDPOINT}?${params.toString()}`;
