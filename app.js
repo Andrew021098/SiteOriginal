@@ -27,27 +27,6 @@ const CATEGORIES = [
   { name: "Banheiros e Acessórios", icon: "🚽" }
 ];
 
-let PRODUCTS = [];
-
-let offersLoadedProducts = [];
-let catalogLoadedProducts = [];
-
-let catalogPage = 1;
-let catalogLimit = 100;
-let catalogLoading = false;
-let catalogHasMore = true;
-
-let offersPage = 1;
-let offersLimit = 10;
-let offersLoading = false;
-let offersHasMore = true;
-
-let isCatalogObserverStarted = false;
-let isOffersObserverStarted = false;
-
-const API_BASE_URL = "http://localhost:3000";
-const PRODUCTS_ENDPOINT = `${API_BASE_URL}/api/products-db`;
-
 const BRANDS = [
   "Votorantim",
   "Tigre",
@@ -58,6 +37,32 @@ const BRANDS = [
   "Portobello",
   "Atlas"
 ];
+
+const API_BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000"
+    : "http://localhost:3000";
+
+const PRODUCTS_ENDPOINT = `${API_BASE_URL}/api/products-db`;
+
+let PRODUCTS = [];
+let offersLoadedProducts = [];
+let catalogLoadedProducts = [];
+
+let catalogPage = 1;
+let catalogLimit = 30;
+let catalogLoading = false;
+let catalogHasMore = true;
+let catalogLastTotal = 0;
+
+let offersPage = 1;
+let offersLimit = 10;
+let offersLoading = false;
+let offersHasMore = true;
+
+let isCatalogObserverStarted = false;
+let isOffersObserverStarted = false;
+let isProductsReady = false;
 
 let activeCategory = "Todos";
 let searchTerm = "";
@@ -156,29 +161,64 @@ function mergeProductsIntoStore(products) {
   PRODUCTS = Array.from(byId.values());
 }
 
-async function fetchProductsPage(page = 1, limit = 100) {
+function getSearchSource() {
+  if (catalogLoadedProducts.length) return catalogLoadedProducts;
+  if (offersLoadedProducts.length) return offersLoadedProducts;
+  return PRODUCTS;
+}
+
+function getCurrentBaseProducts() {
+  const isCatalogPage = Boolean(document.getElementById("catalogGrid"));
+
+  if (isCatalogPage) {
+    return catalogLoadedProducts.length ? catalogLoadedProducts : PRODUCTS;
+  }
+
+  return PRODUCTS;
+}
+
+async function fetchProductsPage(page = 1, limit = 100, extraFilters = {}) {
   try {
-    const response = await fetch(`${PRODUCTS_ENDPOINT}?page=${page}&limit=${limit}`);
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit)
+    });
+
+    if (extraFilters.search?.trim()) {
+      params.set("search", extraFilters.search.trim());
+    }
+
+    if (extraFilters.category?.trim() && extraFilters.category !== "Todos") {
+      params.set("category", extraFilters.category.trim());
+    }
+
+    const url = `${PRODUCTS_ENDPOINT}?${params.toString()}`;
+    console.log("🔥 Buscando:", url);
+
+    const response = await fetch(url);
 
     if (!response.ok) {
       throw new Error(`Erro HTTP: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log("📦 RESPOSTA API:", data);
 
-    const products = Array.isArray(data.products) ? data.products : [];
+    const products = Array.isArray(data.products)
+      ? data.products
+      : Array.isArray(data)
+      ? data
+      : [];
 
     return {
       products,
-      hasMore: typeof data.hasMore === "boolean"
-        ? data.hasMore
-        : products.length >= limit,
-      total: Number(data.total || products.length || 0),
+      hasMore: typeof data.hasMore === "boolean" ? data.hasMore : products.length >= limit,
+      total: Number(data.total || 0),
       page: Number(data.page || page),
       limit: Number(data.limit || limit)
     };
   } catch (error) {
-    console.error("Erro ao carregar página de produtos:", error);
+    console.error("❌ Erro ao carregar página de produtos:", error);
     return {
       products: [],
       hasMore: false,
@@ -194,7 +234,8 @@ async function fetchProducts() {
 
   console.log("fetchProducts ->", firstPage);
 
-  PRODUCTS = firstPage.products || [];
+  PRODUCTS = Array.isArray(firstPage.products) ? firstPage.products : [];
+  isProductsReady = PRODUCTS.length > 0;
 
   window.dispatchEvent(new CustomEvent("cb:productsLoaded", {
     detail: { products: PRODUCTS }
@@ -206,36 +247,52 @@ async function fetchProducts() {
 async function loadCatalogPage(reset = false) {
   if (catalogLoading) return;
 
+  const selectedCategory =
+    document.querySelector('input[name="categoryFilter"]:checked')?.value || "Todos";
+
   if (reset) {
     catalogPage = 1;
     catalogHasMore = true;
     catalogLoadedProducts = [];
+    catalogLastTotal = 0;
   }
 
-  if (!catalogHasMore) {
-    renderCatalog();
+  if (!catalogHasMore && !reset) {
+    renderCatalog(catalogLastTotal);
     return;
   }
 
   catalogLoading = true;
-  renderCatalog();
+  renderCatalog(catalogLastTotal);
 
-  const result = await fetchProductsPage(catalogPage, catalogLimit);
-  console.log("loadCatalogPage ->", result);
+  const result = await fetchProductsPage(catalogPage, catalogLimit, {
+    search: searchTerm,
+    category: selectedCategory
+  });
+
+  console.log("result.products", result.products);
 
   if (reset) {
     catalogLoadedProducts = [...result.products];
   } else {
-    catalogLoadedProducts = [...catalogLoadedProducts, ...result.products];
+    const map = new Map(catalogLoadedProducts.map((product) => [Number(product.id), product]));
+    result.products.forEach((product) => {
+      map.set(Number(product.id), product);
+    });
+    catalogLoadedProducts = Array.from(map.values());
   }
+
+  console.log("catalogLoadedProducts", catalogLoadedProducts);
 
   mergeProductsIntoStore(result.products);
 
   catalogHasMore = result.hasMore;
+  catalogLastTotal = result.total;
   catalogPage += 1;
   catalogLoading = false;
+  isProductsReady = PRODUCTS.length > 0 || catalogLoadedProducts.length > 0 || offersLoadedProducts.length > 0;
 
-  renderCatalog();
+  renderCatalog(result.total);
 }
 
 async function loadOffersPage(reset = false) {
@@ -255,12 +312,19 @@ async function loadOffersPage(reset = false) {
   offersLoading = true;
   renderOffersInfinite();
 
-  const result = await fetchProductsPage(offersPage, offersLimit);
+  const result = await fetchProductsPage(offersPage, offersLimit, {
+    search: searchTerm,
+    category: activeCategory
+  });
 
   if (reset) {
     offersLoadedProducts = [...result.products];
   } else {
-    offersLoadedProducts = [...offersLoadedProducts, ...result.products];
+    const map = new Map(offersLoadedProducts.map((product) => [Number(product.id), product]));
+    result.products.forEach((product) => {
+      map.set(Number(product.id), product);
+    });
+    offersLoadedProducts = Array.from(map.values());
   }
 
   mergeProductsIntoStore(result.products);
@@ -268,6 +332,7 @@ async function loadOffersPage(reset = false) {
   offersHasMore = result.hasMore;
   offersPage += 1;
   offersLoading = false;
+  isProductsReady = PRODUCTS.length > 0 || offersLoadedProducts.length > 0;
 
   renderOffersInfinite();
 }
@@ -389,7 +454,7 @@ function closeDrawer() {
 }
 
 function getFilteredProducts() {
-  let result = [...PRODUCTS];
+  let result = [...getCurrentBaseProducts()];
 
   if (activeCategory !== "Todos") {
     result = result.filter((product) => product.category === activeCategory);
@@ -459,9 +524,19 @@ function renderCategories() {
       <div class="catTitle">${category.name}</div>
     `;
 
-    card.addEventListener("click", () => {
+    card.addEventListener("click", async () => {
       activeCategory = category.name;
-      renderAllSections();
+
+      if (document.getElementById("catalogGrid")) {
+        const matchingInput = document.querySelector(
+          `input[name="categoryFilter"][value="${CSS.escape(category.name)}"]`
+        );
+        if (matchingInput) matchingInput.checked = true;
+        await loadCatalogPage(true);
+      } else {
+        renderAllSections();
+      }
+
       document.getElementById("ofertas")?.scrollIntoView({
         behavior: "smooth",
         block: "start"
@@ -495,8 +570,6 @@ function productCard(product) {
         ${hasOld ? `<div class="oldPrice">${brl(product.oldPrice)}</div>` : `<div class="oldPrice"></div>`}
         <div class="newPrice">${brl(product.price)}</div>
       </div>
-
-       ${""}
 
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:auto;">
         <button class="btn btn--outline productDetailsBtn" type="button">Ver detalhes</button>
@@ -545,8 +618,21 @@ function renderOffersInfinite() {
 
   if (!grid) return;
 
-  const promoProducts = [...offersLoadedProducts]
+  const source = offersLoadedProducts.length ? offersLoadedProducts : PRODUCTS;
+
+  const promoProducts = [...source]
     .filter((product) => typeof product.offPct === "number" && product.offPct > 0)
+    .filter((product) => {
+      if (!searchTerm.trim()) return true;
+      const term = normalizeText(searchTerm);
+      return (
+        normalizeText(product.name).includes(term) ||
+        normalizeText(product.category).includes(term) ||
+        normalizeText(product.brand).includes(term) ||
+        normalizeText(product.description).includes(term)
+      );
+    })
+    .filter((product) => activeCategory === "Todos" || product.category === activeCategory)
     .sort((a, b) => Number(b.offPct || 0) - Number(a.offPct || 0));
 
   grid.innerHTML = "";
@@ -700,13 +786,20 @@ function setupSearch() {
     suggestionsBox.style.display = "none";
   }
 
-  function applySearchAndRender() {
+  async function applySearchAndRender() {
     searchTerm = input.value.trim();
-    renderAllSections();
+
+    if (!isProductsReady && !PRODUCTS.length && !catalogLoadedProducts.length && !offersLoadedProducts.length) {
+      hideSuggestions();
+      return;
+    }
 
     if (document.getElementById("catalogGrid")) {
-      loadCatalogPage(true);
+      await loadCatalogPage(true);
+      return;
     }
+
+    renderAllSections();
   }
 
   function renderSuggestions(term) {
@@ -719,15 +812,24 @@ function setupSearch() {
       return;
     }
 
-    const suggestions = PRODUCTS.filter((product) => {
+    const source = getSearchSource();
+
+    if (!source.length) {
+      hideSuggestions();
+      return;
+    }
+
+    const suggestions = source.filter((product) => {
       const name = normalizeText(product.name);
       const category = normalizeText(product.category);
       const brand = normalizeText(product.brand);
+      const description = normalizeText(product.description);
 
       return (
         name.includes(normalizedTerm) ||
         category.includes(normalizedTerm) ||
-        brand.includes(normalizedTerm)
+        brand.includes(normalizedTerm) ||
+        description.includes(normalizedTerm)
       );
     }).slice(0, 6);
 
@@ -737,7 +839,7 @@ function setupSearch() {
     }
 
     suggestionsBox.innerHTML = suggestions.map((product) => `
-      <div class="searchSuggestionItem" data-name="${product.name}">
+      <div class="searchSuggestionItem" data-name="${String(product.name || "").replace(/"/g, "&quot;")}">
         <strong>${product.name}</strong>
         <span>${product.brand || "Sem marca"} • ${product.category || "Sem categoria"}</span>
       </div>
@@ -746,15 +848,15 @@ function setupSearch() {
     suggestionsBox.style.display = "block";
 
     suggestionsBox.querySelectorAll(".searchSuggestionItem").forEach((item) => {
-      item.addEventListener("click", () => {
+      item.addEventListener("click", async () => {
         const selectedName = item.dataset.name || "";
         input.value = selectedName;
         searchTerm = selectedName;
 
-        renderAllSections();
-
         if (document.getElementById("catalogGrid")) {
-          loadCatalogPage(true);
+          await loadCatalogPage(true);
+        } else {
+          renderAllSections();
         }
 
         hideSuggestions();
@@ -777,9 +879,9 @@ function setupSearch() {
     });
   }
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    applySearchAndRender();
+    await applySearchAndRender();
     hideSuggestions();
 
     const catalogGrid = document.getElementById("catalogGrid");
@@ -800,8 +902,8 @@ function setupSearch() {
 
   let debounceTimer;
 
-  input.addEventListener("input", () => {
-    applySearchAndRender();
+  input.addEventListener("input", async () => {
+    await applySearchAndRender();
 
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
@@ -820,12 +922,10 @@ function setupSearch() {
       hideSuggestions();
     }
   });
-
 }
 
 function setupSort() {
   const select = document.getElementById("sortSelect");
-  
   const catalogSort = document.getElementById("catalogSort");
 
   if (select) {
@@ -837,7 +937,7 @@ function setupSort() {
 
   if (catalogSort) {
     catalogSort.addEventListener("change", () => {
-      renderCatalog();
+      renderCatalog(catalogLastTotal);
     });
   }
 }
@@ -1010,7 +1110,10 @@ function setupDrawer() {
 }
 
 function openProductModal(productId) {
-  const product = PRODUCTS.find((p) => Number(p.id) === Number(productId));
+  const product = PRODUCTS.find((p) => Number(p.id) === Number(productId))
+    || catalogLoadedProducts.find((p) => Number(p.id) === Number(productId))
+    || offersLoadedProducts.find((p) => Number(p.id) === Number(productId));
+
   const modal = document.getElementById("productModal");
 
   if (!product || !modal) return;
@@ -1160,32 +1263,7 @@ function setupProductModal() {
 
 function getCatalogFilteredProducts() {
   let products = [...catalogLoadedProducts];
-
-  const selectedCategory =
-    document.querySelector('input[name="categoryFilter"]:checked')?.value || "Todos";
   const selectedSort = document.getElementById("catalogSort")?.value || "default";
-
-  if (selectedCategory !== "Todos") {
-    products = products.filter((product) => product.category === selectedCategory);
-  }
-
-  if (searchTerm.trim()) {
-    const term = normalizeText(searchTerm);
-
-    products = products.filter((product) => {
-      const name = normalizeText(product.name);
-      const category = normalizeText(product.category);
-      const brand = normalizeText(product.brand);
-      const description = normalizeText(product.description);
-
-      return (
-        name.includes(term) ||
-        category.includes(term) ||
-        brand.includes(term) ||
-        description.includes(term)
-      );
-    });
-  }
 
   if (catalogFilters.minPrice !== null) {
     products = products.filter((product) => Number(product.price || 0) >= catalogFilters.minPrice);
@@ -1237,7 +1315,7 @@ function getCatalogFilteredProducts() {
   return products;
 }
 
-function renderCatalog() {
+function renderCatalog(totalFromApi = null) {
   const grid = document.getElementById("catalogGrid");
   const count = document.getElementById("catalogCount");
   const loader = document.getElementById("catalogLoader");
@@ -1249,7 +1327,7 @@ function renderCatalog() {
   grid.innerHTML = "";
 
   if (count) {
-    count.textContent = String(products.length);
+    count.textContent = String(totalFromApi ?? catalogLastTotal ?? products.length);
   }
 
   if (!products.length) {
@@ -1324,7 +1402,7 @@ function setupAdvancedCatalogFilters() {
   discountInputs.forEach((input) => {
     input.addEventListener("change", () => {
       catalogFilters.minDiscount = Number(input.value || 0);
-      loadCatalogPage(true);
+      renderCatalog(catalogLastTotal);
     });
   });
 
@@ -1334,28 +1412,28 @@ function setupAdvancedCatalogFilters() {
         .filter((item) => item.checked)
         .map((item) => item.value);
 
-      loadCatalogPage(true);
+      renderCatalog(catalogLastTotal);
     });
   });
 
   saleFormatInputs.forEach((input) => {
     input.addEventListener("change", () => {
       catalogFilters.saleFormat = input.value || "Todos";
-      loadCatalogPage(true);
+      renderCatalog(catalogLastTotal);
     });
   });
 
   if (flashOfferInput) {
     flashOfferInput.addEventListener("change", () => {
       catalogFilters.flashOffer = flashOfferInput.checked;
-      loadCatalogPage(true);
+      renderCatalog(catalogLastTotal);
     });
   }
 
   if (installmentsInput) {
     installmentsInput.addEventListener("change", () => {
       catalogFilters.installmentsNoInterest = installmentsInput.checked;
-      loadCatalogPage(true);
+      renderCatalog(catalogLastTotal);
     });
   }
 
@@ -1377,7 +1455,7 @@ function setupAdvancedCatalogFilters() {
       if (priceMinInput) priceMinInput.value = catalogFilters.minPrice ?? "";
       if (priceMaxInput) priceMaxInput.value = catalogFilters.maxPrice ?? "";
 
-      loadCatalogPage(true);
+      renderCatalog(catalogLastTotal);
     });
   });
 
@@ -1389,7 +1467,7 @@ function setupAdvancedCatalogFilters() {
       catalogFilters.minPrice = minRaw ? Number(minRaw) : null;
       catalogFilters.maxPrice = maxRaw ? Number(maxRaw) : null;
 
-      loadCatalogPage(true);
+      renderCatalog(catalogLastTotal);
     });
   }
 }
@@ -1402,14 +1480,14 @@ function setupCatalog() {
   const sortSelect = document.getElementById("catalogSort");
 
   categoryInputs.forEach((input) => {
-    input.addEventListener("change", () => {
-      loadCatalogPage(true);
+    input.addEventListener("change", async () => {
+      await loadCatalogPage(true);
     });
   });
 
   if (sortSelect) {
     sortSelect.addEventListener("change", () => {
-      renderCatalog();
+      renderCatalog(catalogLastTotal);
     });
   }
 
@@ -1493,16 +1571,9 @@ async function init() {
 
     console.log("HOME PRODUCTS ->", products);
 
-    if (products.length) {
-      renderBrands();
-      renderAllSections();
-      renderCart();
-    } else {
-      console.error("Nenhum produto carregado.");
-      renderBrands();
-      renderAllSections();
-      renderCart();
-    }
+    renderBrands();
+    renderAllSections();
+    renderCart();
   }
 
   if (isHomeOffers) {
@@ -1516,7 +1587,7 @@ async function init() {
   }
 
   return {
-    productsLoaded: PRODUCTS.length > 0,
+    productsLoaded: PRODUCTS.length > 0 || catalogLoadedProducts.length > 0 || offersLoadedProducts.length > 0,
     products: PRODUCTS
   };
 }
