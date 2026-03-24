@@ -400,6 +400,7 @@ app.post("/distribuir-lead", (req, res) => {
       pagamento: req.body.paymentMethod || "",
       observacoes: req.body.notes || "",
       subtotal: Number(req.body.subtotal || 0),
+      frete: req.body.shipping === "R$150,00" ? 0 : Number(req.body.shipping || 0),
       total: Number(req.body.total || 0),
       itens: sanitizeItems(req.body.items),
       vendedor,
