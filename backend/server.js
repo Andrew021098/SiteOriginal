@@ -412,21 +412,21 @@ app.post("/distribuir-lead", (req, res) => {
     saveLeadsData(leads);
 
     const itensTexto = lead.itens.length
-      ? lead.itens
-          .map(item => `- ${item.nome} x${item.quantidade} — R$ ${item.preco_unitario.toFixed(2)}`)
-          .join("\n")
-      : "- Nenhum item informado";
+  ? lead.itens
+      .map(item => `- ${item.nome} x${item.quantidade} — R$ ${item.preco_unitario.toFixed(2)}`)
+      .join("\n")
+  : "- Nenhum item informado";
 
-    const formaRecebimento =
-      lead.entrega === "pickup" || lead.entrega === "Retirada"
-        ? "Retirada na loja"
-        : "Entrega";
+const formaRecebimento =
+  lead.entrega === "pickup" || lead.entrega === "Retirada"
+    ? "Retirada na loja"
+    : "Entrega";
 
-    const enderecoTexto =
-      formaRecebimento === "Retirada na loja"
-        ? "Retirada na loja"
-        : [
-            lead.endereco,
+const enderecoTexto =
+  formaRecebimento === "Retirada na loja"
+    ? "Retirada na loja"
+    : [
+        lead.endereco,
             lead.complemento,
             lead.cep ? `CEP: ${lead.cep}` : ""
           ]
