@@ -54,9 +54,9 @@ const CATEGORY_MAP = {
 const API_BASE_URL =
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:3000"
-    : "http://localhost:3000";
+    : "https://siteoriginal.onrender.com";
 
-const PRODUCTS_ENDPOINT = `${API_BASE_URL}/api/products-db`;
+const PRODUCTS_ENDPOINT = `${API_BASE_URL}/api/products`;
 
 let PRODUCTS = [];
 let offersLoadedProducts = [];
