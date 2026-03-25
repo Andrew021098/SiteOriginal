@@ -51,13 +51,16 @@ const CATEGORY_MAP = {
   "Banheiros e Acessórios": "VALVULA"
 };
 
-const API_BASE_URL =
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:3000"
-    : "https://siteoriginal.onrender.com";
+const isLocalhost =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
+
+const API_BASE_URL = isLocalhost
+  ? "http://localhost:3000"
+  : "https://siteoriginal.onrender.com";
 
 const PRODUCTS_ENDPOINT = `${API_BASE_URL}/api/products`;
-
+704,23
 let PRODUCTS = [];
 let offersLoadedProducts = [];
 let catalogLoadedProducts = [];

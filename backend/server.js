@@ -415,76 +415,52 @@ app.post("/api/cache/refresh", async (req, res) => {
    PRODUTOS FIREBIRD DIRETO
 ========================= */
 
-app.get("/api/products-db", async (req, res) => {
+app.get("/api/products", (req, res) => {
   try {
     const page = Math.max(1, Number(req.query.page || 1));
     const limit = Math.max(1, Number(req.query.limit || 100));
     const offset = (page - 1) * limit;
 
-    const search = String(req.query.search || "").trim();
+    const search = String(req.query.search || "").trim().toLowerCase();
     const category = String(req.query.category || "").trim();
 
-    const baseUrl = getBaseUrl(req);
-    const where = [];
+    let products = getProductsData();
 
     if (search) {
-      const safeSearch = search.replace(/'/g, "''");
-      where.push(`(
-        NAME CONTAINING '${safeSearch}'
-        OR CATEGORY CONTAINING '${safeSearch}'
-        OR DESCRIPTION CONTAINING '${safeSearch}'
-      )`);
+      products = products.filter((product) => {
+        return (
+          String(product.name || "").toLowerCase().includes(search) ||
+          String(product.category || "").toLowerCase().includes(search) ||
+          String(product.description || "").toLowerCase().includes(search)
+        );
+      });
     }
 
     if (category && category !== "Todos") {
-      const safeCategory = category.replace(/'/g, "''");
-      where.push(`CATEGORY CONTAINING '${safeCategory}'`);
+      products = products.filter((product) =>
+        String(product.category || "").toLowerCase() === category.toLowerCase()
+      );
     }
 
-    const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+    const total = products.length;
+    const paginated = products.slice(offset, offset + limit);
 
-    const rows = await queryFirebird(`
-      SELECT
-        ID,
-        NAME,
-        IMAGE,
-        DESCRIPTION,
-        CATEGORY,
-        STOCK,
-        PRICE,
-        PROMO_PRICE
-      FROM BANCOSQL
-      ${whereSql}
-      ORDER BY NAME
-      ROWS ${offset + 1} TO ${offset + limit}
-    `);
-
-    const countRows = await queryFirebird(`
-      SELECT COUNT(*) AS TOTAL
-      FROM BANCOSQL
-      ${whereSql}
-    `);
-
-    const total = Number(countRows?.[0]?.total || 0);
-    const products = mapDbProducts(rows, baseUrl);
-
-    res.json({
+    return res.json({
       success: true,
-      source: "firebird",
+      source: "json",
       page,
       limit,
       total,
-      hasMore: offset + products.length < total,
+      hasMore: offset + paginated.length < total,
       search,
       category,
-      products
+      products: paginated
     });
   } catch (error) {
-    console.error("Erro em /api/products-db:", error);
-    res.status(500).json({
+    console.error("Erro em /api/products:", error);
+    return res.status(500).json({
       success: false,
-      message: "Erro ao carregar produtos do Firebird.",
-      details: String(error.message || error)
+      message: "Erro ao carregar produtos do JSON."
     });
   }
 });
