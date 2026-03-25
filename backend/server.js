@@ -27,6 +27,7 @@ const dbOptions = {
 ========================= */
 
 const REUTILIZAR_MESMO_VENDEDOR = false;
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutos
 
 app.use(cors({
   origin: "*",
@@ -42,6 +43,14 @@ const vendedoresFile = path.join(__dirname, "vendedores.json");
 const leadsFile = path.join(__dirname, "leads.json");
 const filaFile = path.join(__dirname, "fila.json");
 const productsFile = path.join(__dirname, "products.json");
+
+const productsCache = {
+  items: null,
+  source: null,
+  updatedAt: null,
+  expiresAt: null,
+  lastError: null
+};
 
 /* =========================
    UTILITÁRIOS
@@ -102,6 +111,12 @@ function getBaseUrl(req) {
     return envBaseUrl.replace(/\/$/, "");
   }
   return `${req.protocol}://${req.get("host")}`;
+}
+
+function isCacheValid() {
+  return Array.isArray(productsCache.items) &&
+    productsCache.expiresAt &&
+    Date.now() < productsCache.expiresAt;
 }
 
 /* =========================
@@ -222,6 +237,90 @@ function mapDbProducts(rows, baseUrl) {
   });
 }
 
+async function fetchProductsFromDB(req) {
+  const baseUrl = getBaseUrl(req);
+
+  const rows = await queryFirebird(`
+    SELECT
+      ID,
+      NAME,
+      IMAGE,
+      DESCRIPTION,
+      CATEGORY,
+      STOCK,
+      PRICE,
+      PROMO_PRICE
+    FROM BANCOSQL
+    ORDER BY NAME
+    ROWS 1 TO 200
+  `);
+
+  return mapDbProducts(rows, baseUrl);
+}
+
+async function refreshProductsCache(req) {
+  try {
+    const products = await fetchProductsFromDB(req);
+
+    productsCache.items = products;
+    productsCache.source = "firebird";
+    productsCache.updatedAt = new Date().toISOString();
+    productsCache.expiresAt = Date.now() + CACHE_TTL_MS;
+    productsCache.lastError = null;
+
+    return {
+      success: true,
+      source: "firebird",
+      total: products.length,
+      updatedAt: productsCache.updatedAt,
+      expiresAt: new Date(productsCache.expiresAt).toISOString(),
+      products
+    };
+  } catch (error) {
+    console.error("Erro Firebird:", error.message);
+    productsCache.lastError = error.message;
+
+    if (Array.isArray(productsCache.items)) {
+      return {
+        success: true,
+        source: "cache-stale",
+        warning: "Firebird offline, usando cache anterior",
+        total: productsCache.items.length,
+        updatedAt: productsCache.updatedAt,
+        expiresAt: productsCache.expiresAt
+          ? new Date(productsCache.expiresAt).toISOString()
+          : null,
+        products: productsCache.items
+      };
+    }
+
+    const fallback = getProductsData();
+    const baseUrl = getBaseUrl(req);
+
+    const normalizedFallback = fallback.map((product) => {
+      const imageFile = safeFileName(product.image);
+      const isAbsolute = /^https?:\/\//i.test(String(product.image || ""));
+
+      return {
+        ...product,
+        image: isAbsolute
+          ? product.image
+          : imageFile
+          ? `${baseUrl}/assets/produtos/${imageFile}`
+          : `${baseUrl}/assets/no-image.jpg`
+      };
+    });
+
+    return {
+      success: true,
+      source: "json-fallback",
+      warning: "Firebird offline, usando JSON",
+      total: normalizedFallback.length,
+      products: normalizedFallback
+    };
+  }
+}
+
 /* =========================
    ROTAS
 ========================= */
@@ -249,45 +348,71 @@ app.get("/leads", (req, res) => {
 });
 
 /* =========================
-   PRODUTOS JSON
+   PRODUTOS COM CACHE
 ========================= */
 
-app.get("/api/products", (req, res) => {
+app.get("/api/products", async (req, res) => {
   try {
-    const products = getProductsData();
-    const baseUrl = getBaseUrl(req);
+    if (isCacheValid()) {
+      return res.json({
+        success: true,
+        source: "cache",
+        total: productsCache.items.length,
+        updatedAt: productsCache.updatedAt,
+        expiresAt: new Date(productsCache.expiresAt).toISOString(),
+        products: productsCache.items
+      });
+    }
 
-    const normalizedProducts = products.map((product) => {
-      const imageFile = safeFileName(product.image);
-      const isAbsolute = /^https?:\/\//i.test(String(product.image || ""));
-
-      return {
-        ...product,
-        image: isAbsolute
-          ? product.image
-          : imageFile
-          ? `${baseUrl}/assets/produtos/${imageFile}`
-          : `${baseUrl}/assets/no-image.jpg`
-      };
-    });
-
-    res.json({
-      success: true,
-      source: "json",
-      total: normalizedProducts.length,
-      products: normalizedProducts
-    });
+    const result = await refreshProductsCache(req);
+    return res.json(result);
   } catch (error) {
-    console.error("Erro em /api/products:", error);
-    res.status(500).json({
+    console.error("Erro /api/products:", error);
+    return res.status(500).json({
       success: false,
-      message: "Erro ao carregar produtos do JSON."
+      message: "Erro ao carregar produtos"
     });
   }
 });
 
 /* =========================
-   PRODUTOS FIREBIRD
+   STATUS / REFRESH CACHE
+========================= */
+
+app.get("/api/cache/status", (req, res) => {
+  res.json({
+    success: true,
+    cache: {
+      valid: isCacheValid(),
+      source: productsCache.source,
+      updatedAt: productsCache.updatedAt,
+      expiresAt: productsCache.expiresAt
+        ? new Date(productsCache.expiresAt).toISOString()
+        : null,
+      total: Array.isArray(productsCache.items) ? productsCache.items.length : 0,
+      lastError: productsCache.lastError
+    }
+  });
+});
+
+app.post("/api/cache/refresh", async (req, res) => {
+  try {
+    const result = await refreshProductsCache(req);
+    res.json({
+      ...result,
+      refreshed: true
+    });
+  } catch (error) {
+    console.error("Erro /api/cache/refresh:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro ao atualizar cache"
+    });
+  }
+});
+
+/* =========================
+   PRODUTOS FIREBIRD DIRETO
 ========================= */
 
 app.get("/api/products-db", async (req, res) => {
@@ -412,28 +537,28 @@ app.post("/distribuir-lead", (req, res) => {
     saveLeadsData(leads);
 
     const itensTexto = lead.itens.length
-  ? lead.itens
-      .map(item => `- ${item.nome} x${item.quantidade} — R$ ${item.preco_unitario.toFixed(2)}`)
-      .join("\n")
-  : "- Nenhum item informado";
+      ? lead.itens
+          .map(item => `- ${item.nome} x${item.quantidade} — R$ ${item.preco_unitario.toFixed(2)}`)
+          .join("\n")
+      : "- Nenhum item informado";
 
-const formaRecebimento =
-  lead.entrega === "pickup" || lead.entrega === "Retirada"
-    ? "Retirada na loja"
-    : "Entrega";
+    const formaRecebimento =
+      lead.entrega === "pickup" || lead.entrega === "Retirada"
+        ? "Retirada na loja"
+        : "Entrega";
 
-const enderecoTexto =
-  formaRecebimento === "Retirada na loja"
-    ? "Retirada na loja"
-    : [
-        lead.endereco,
+    const enderecoTexto =
+      formaRecebimento.includes("Retirada")
+        ? "Retirada na loja"
+        : [
+            lead.endereco,
             lead.complemento,
-            lead.cep ? `CEP: ${lead.cep}` : ""
+            lead.cep ? `📍 CEP: ${lead.cep}` : ""
           ]
             .filter(Boolean)
             .join(" | ");
 
-    const mensagem = `🔥 *NOVO ORÇAMENTO* 🔥
+    const mensagem = `*NOVO ORÇAMENTO*
 
 *Cliente:* ${lead.cliente}
 *Telefone:* ${lead.telefone}
@@ -442,6 +567,7 @@ const enderecoTexto =
 *ITENS:*
 ${itensTexto}
 
+*Subtotal:* R$ ${lead.subtotal.toFixed(2)}
 *Total:* R$ ${lead.total.toFixed(2)}
 
 ${formaRecebimento}
@@ -476,3 +602,25 @@ ${formaRecebimento}
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
+setInterval(async () => {
+  try {
+    const fakeReq = {
+      protocol: process.env.BASE_URL ? process.env.BASE_URL.split("://")[0] : "https",
+      get: (header) => {
+        if (header === "host") {
+          if (process.env.BASE_URL) {
+            return process.env.BASE_URL.replace(/^https?:\/\//, "");
+          }
+          return `localhost:${PORT}`;
+        }
+        return "";
+      }
+    };
+
+    await refreshProductsCache(fakeReq);
+    console.log("Cache de produtos atualizado automaticamente.");
+  } catch (error) {
+    console.error("Erro ao atualizar cache automaticamente:", error.message);
+  }
+}, CACHE_TTL_MS);
