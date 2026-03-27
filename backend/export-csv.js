@@ -1,19 +1,31 @@
+require("dotenv").config();
 const fs = require("fs");
 
-const BASE_URL = "http://localhost:3000/api/products-db";
-const LIMIT = 1000; // pega 1000 por vez (evita travar)
+const BASE_URL = process.env.PRODUCTS_DB_URL || "http://localhost:3000/api/products-db";
+const API_KEY = process.env.INTERNAL_SECRET || "";
+const LIMIT = Number(process.env.EXPORT_LIMIT || 1000);
 const OUTPUT = "./products.csv";
 
 async function fetchPage(page) {
   const url = `${BASE_URL}?page=${page}&limit=${LIMIT}`;
-  const res = await fetch(url);
+
+  const res = await fetch(url, {
+    headers: {
+      "x-api-key": API_KEY
+    }
+  });
 
   if (!res.ok) {
-    throw new Error(`Erro HTTP: ${res.status}`);
+    const text = await res.text().catch(() => "");
+    throw new Error(`Erro HTTP ${res.status}: ${text}`);
   }
 
   const data = await res.json();
   return data;
+}
+
+function escapeCsv(value) {
+  return `"${String(value ?? "").replace(/"/g, '""')}"`;
 }
 
 function toCSV(products) {
@@ -22,53 +34,71 @@ function toCSV(products) {
     "name",
     "category",
     "brand",
+    "saleFormat",
+    "installmentsNoInterest",
+    "flashOffer",
     "price",
     "oldPrice",
-    "stock",
-    "description"
+    "offPct",
+    "freeShip",
+    "image",
+    "featured",
+    "description",
+    "stock"
   ];
 
-  const lines = products.map(p => [
-    p.id,
-    `"${(p.name || "").replace(/"/g, '""')}"`,
-    `"${(p.category || "").replace(/"/g, '""')}"`,
-    `"${(p.brand || "").replace(/"/g, '""')}"`,
+  const lines = products.map((p) => [
+    p.id ?? "",
+    escapeCsv(p.name),
+    escapeCsv(p.category),
+    escapeCsv(p.brand),
+    escapeCsv(p.saleFormat),
+    p.installmentsNoInterest ?? false,
+    p.flashOffer ?? false,
     p.price ?? "",
     p.oldPrice ?? "",
-    p.stock ?? "",
-    `"${(p.description || "").replace(/"/g, '""')}"`
+    p.offPct ?? "",
+    p.freeShip ?? false,
+    escapeCsv(p.image),
+    p.featured ?? false,
+    escapeCsv(p.description),
+    p.stock ?? 0
   ].join(";"));
 
   return [headers.join(";"), ...lines].join("\n");
 }
 
 async function run() {
+  if (!API_KEY) {
+    throw new Error("INTERNAL_SECRET não definido no .env");
+  }
+
   let page = 1;
   let allProducts = [];
 
-  console.log("🚀 Iniciando exportação...");
+  console.log("🚀 Iniciando exportação Firebird → CSV");
 
   while (true) {
     const data = await fetchPage(page);
+    const products = Array.isArray(data.products) ? data.products : [];
 
-    console.log(`📦 Página ${page} → ${data.products.length} produtos`);
+    console.log(`📦 Página ${page} → ${products.length} produtos`);
 
-    allProducts = allProducts.concat(data.products);
+    allProducts = allProducts.concat(products);
 
     if (!data.hasMore) break;
-
     page++;
   }
 
   console.log(`✅ Total coletado: ${allProducts.length}`);
 
   const csv = toCSV(allProducts);
-
   fs.writeFileSync(OUTPUT, csv, "utf8");
 
   console.log(`📁 CSV salvo em: ${OUTPUT}`);
 }
 
-run().catch(err => {
-  console.error("❌ Erro:", err.message);
+run().catch((err) => {
+  console.error("❌ Erro na exportação:", err.message);
+  process.exit(1);
 });

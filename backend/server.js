@@ -4,16 +4,34 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const Firebird = require("node-firebird");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const REUTILIZAR_MESMO_VENDEDOR = false;
+const INTERNAL_SECRET = process.env.INTERNAL_SECRET || "";
+
+console.log("FIREBIRD_HOST:", process.env.FIREBIRD_HOST);
+console.log("FIREBIRD_USER:", process.env.FIREBIRD_USER);
+console.log("FIREBIRD_PASSWORD existe?", Boolean(process.env.FIREBIRD_PASSWORD));
+console.log("FIREBIRD_DATABASE:", process.env.FIREBIRD_DATABASE);
+
+const firebirdOptions = {
+  host: process.env.FIREBIRD_HOST,
+  port: Number(process.env.FIREBIRD_PORT || 3050),
+  database: process.env.FIREBIRD_DATABASE,
+  user: process.env.FIREBIRD_USER,
+  password: process.env.FIREBIRD_PASSWORD,
+  lowercase_keys: false,
+  role: null,
+  pageSize: 4096
+};
 
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"]
+  allowedHeaders: ["Content-Type", "x-api-key"]
 }));
 
 app.use(express.json());
@@ -118,6 +136,24 @@ function getBaseUrl(req) {
   return `${req.protocol}://${req.get("host")}`;
 }
 
+function parseMoney(value) {
+  if (value == null || value === "") return null;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+}
+
+function buildImagePath(foto) {
+  const raw = String(foto || "").trim();
+
+  if (!raw) return "/assets/no-image.jpg";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("/assets/")) return raw;
+  if (raw.startsWith("./assets/")) return raw.replace(".", "");
+
+  const fileName = raw.split(/[/\\]/).pop();
+  return `/assets/produtos/${fileName}`;
+}
+
 /* =========================
    LEITURA / ESCRITA
 ========================= */
@@ -193,6 +229,105 @@ function pickNextVendedor() {
 }
 
 /* =========================
+   MIDDLEWARE INTERNO
+========================= */
+
+function requireInternalApiKey(req, res, next) {
+  if (!INTERNAL_SECRET) {
+    return res.status(500).json({
+      success: false,
+      message: "INTERNAL_SECRET não configurado no .env"
+    });
+  }
+
+  const apiKey = req.headers["x-api-key"];
+
+  if (!apiKey || apiKey !== INTERNAL_SECRET) {
+    return res.status(403).json({
+      success: false,
+      message: "Acesso negado."
+    });
+  }
+
+  next();
+}
+
+/* =========================
+   FIREBIRD HELPERS
+========================= */
+
+function firebirdQuery(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    Firebird.attach(firebirdOptions, (attachErr, db) => {
+      if (attachErr) {
+        return reject(attachErr);
+      }
+
+      db.query(sql, params, (queryErr, result) => {
+        db.detach();
+
+        if (queryErr) {
+          return reject(queryErr);
+        }
+
+        resolve(result || []);
+      });
+    });
+  });
+}
+
+function mapFirebirdRowToProduct(row) {
+  const id = String(row.ID || "").trim();
+  const name = String(row.NAME || "").trim();
+  const category = String(row.CATEGORY || "Sem categoria").trim();
+
+  const oldPriceRaw = parseMoney(row.PRICE);
+  const promoPriceRaw = parseMoney(row.PROMO_PRICE);
+
+  const price =
+    promoPriceRaw != null && promoPriceRaw > 0
+      ? promoPriceRaw
+      : oldPriceRaw != null
+      ? oldPriceRaw
+      : 0;
+
+  const oldPrice =
+    oldPriceRaw != null &&
+    promoPriceRaw != null &&
+    oldPriceRaw > promoPriceRaw
+      ? oldPriceRaw
+      : null;
+
+  const offPct =
+    oldPrice != null && price > 0 && oldPrice > price
+      ? Math.round(((oldPrice - price) / oldPrice) * 100)
+      : null;
+
+  let description = "Produto sem descrição.";
+if (typeof row.DESCRIPTION === "string" && row.DESCRIPTION.trim()) {
+  description = row.DESCRIPTION.trim();
+}
+
+  return {
+    id,
+    name,
+    category,
+    brand: "",
+    saleFormat: "Unidade",
+    installmentsNoInterest: false,
+    flashOffer: Boolean(offPct && offPct > 0),
+    price: Number(price || 0),
+    oldPrice,
+    offPct,
+    freeShip: false,
+    image: buildImagePath(row.IMAGE),
+    featured: false,
+    description,
+    stock: Number(row.STOCK || 0)
+  };
+}
+
+/* =========================
    ROTAS BÁSICAS
 ========================= */
 
@@ -219,7 +354,7 @@ app.get("/leads", (req, res) => {
 });
 
 /* =========================
-   PRODUTOS VIA JSON
+   PRODUTOS VIA JSON (PÚBLICO)
 ========================= */
 
 app.get("/api/products", (req, res) => {
@@ -274,6 +409,74 @@ app.get("/api/products", (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Erro ao carregar produtos do JSON."
+    });
+  }
+});
+
+/* =========================
+   PRODUTOS VIA FIREBIRD (PRIVADO)
+   USADO SÓ PELO export-csv.js
+========================= */
+
+app.get("/api/products-db", requireInternalApiKey, async (req, res) => {
+  try {
+    const page = Math.max(1, Number(req.query.page || 1));
+    const limit = Math.max(1, Number(req.query.limit || 1000));
+    const offset = (page - 1) * limit;
+
+    const search = String(req.query.search || "").trim().toLowerCase();
+    const category = String(req.query.category || "").trim().toLowerCase();
+
+    const sql = `
+  SELECT
+    ID,
+    NAME,
+    IMAGE,
+    DESCRIPTION,
+    CATEGORY,
+    STOCK,
+    PRICE,
+    PROMO_PRICE
+  FROM BANCOSQL
+`;
+
+    const rows = await firebirdQuery(sql);
+    console.log("COLUNAS REAIS DA VIEW:", rows);
+    let products = rows.map(mapFirebirdRowToProduct).filter((product) => product.name);
+
+    if (search) {
+      products = products.filter((product) =>
+        String(product.name || "").toLowerCase().includes(search) ||
+        String(product.category || "").toLowerCase().includes(search) ||
+        String(product.description || "").toLowerCase().includes(search)
+      );
+    }
+
+    if (category && category !== "todos") {
+      products = products.filter(
+        (product) => String(product.category || "").toLowerCase() === category
+      );
+    }
+
+    const total = products.length;
+    const paginated = products.slice(offset, offset + limit);
+
+    return res.json({
+      success: true,
+      source: "firebird",
+      page,
+      limit,
+      total,
+      hasMore: offset + paginated.length < total,
+      search,
+      category,
+      products: paginated
+    });
+  } catch (error) {
+    console.error("Erro em /api/products-db:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Erro ao carregar produtos do Firebird."
     });
   }
 });
