@@ -28,6 +28,21 @@ function escapeCsv(value) {
   return `"${String(value ?? "").replace(/"/g, '""')}"`;
 }
 
+function normalizeMoney(value) {
+  if (value == null || value === "") return "";
+
+  const cleaned = String(value)
+    .trim()
+    .replace(/^R\$\s*/i, "")
+    .replace(/\s/g, "")
+    .replace(/\.(?=\d{3}(\D|$))/g, "")
+    .replace(",", ".")
+    .replace(/[^\d.-]/g, "");
+
+  const num = Number(cleaned);
+  return Number.isFinite(num) ? num.toFixed(2) : "";
+}
+
 function toCSV(products) {
   const headers = [
     "id",
@@ -55,8 +70,8 @@ function toCSV(products) {
     escapeCsv(p.saleFormat),
     p.installmentsNoInterest ?? false,
     p.flashOffer ?? false,
-    p.price ?? "",
-    p.oldPrice ?? "",
+    normalizeMoney(p.price),
+    normalizeMoney(p.oldPrice),
     p.offPct ?? "",
     p.freeShip ?? false,
     escapeCsv(p.image),

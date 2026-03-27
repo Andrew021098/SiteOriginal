@@ -41,8 +41,11 @@ function toNumber(value, fallback = 0) {
 
   const normalized = String(value)
     .trim()
-    .replace(/\./g, "")
-    .replace(",", ".");
+    .replace(/^R\$\s*/i, "")        // remove R$
+    .replace(/\s/g, "")             // remove espaços
+    .replace(/\.(?=\d{3}(\D|$))/g, "") // remove ponto de milhar
+    .replace(",", ".")              // troca vírgula decimal por ponto
+    .replace(/[^\d.-]/g, "");       // remove qualquer resto
 
   const num = Number(normalized);
   return Number.isFinite(num) ? num : fallback;
