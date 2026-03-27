@@ -354,6 +354,44 @@ app.get("/leads", (req, res) => {
 });
 
 /* =========================
+   QUANTIDADES DE PRODUTOS NO CATALOGO
+========================= */
+
+app.get("/api/categories", (req, res) => {
+  try {
+    const products = getProductsData();
+
+    const counts = new Map();
+
+    products.forEach((product) => {
+      const category = String(product.category || "").trim();
+      if (!category) return;
+
+      counts.set(category, (counts.get(category) || 0) + 1);
+    });
+
+    const categories = Array.from(counts.entries())
+      .sort((a, b) => a[0].localeCompare(b[0], "pt-BR", { sensitivity: "base" }))
+      .map(([name, count]) => ({
+        name,
+        count
+      }));
+
+    return res.json({
+      success: true,
+      total: products.length,
+      categories
+    });
+  } catch (error) {
+    console.error("Erro em /api/categories:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Erro ao carregar categorias."
+    });
+  }
+});
+
+/* =========================
    PRODUTOS VIA JSON (PÚBLICO)
 ========================= */
 
