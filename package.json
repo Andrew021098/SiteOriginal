@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "csv-parse": "^6.2.1",
     "mssql": "^12.2.0",
     "node-firebird": "^2.0.2",
     "sqlite3": "^6.0.1"
