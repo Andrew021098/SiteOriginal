@@ -42,11 +42,11 @@ id;name;category;brand;saleFormat;installmentsNoInterest;flashOffer;price;oldPri
 01.0053;"TAMPO POLIESTER ESTRELA MAR AMAR";"TAMPOS E ACESSORIOS";"";"Unidade";false;true;299.00;381.22;22;false;"/assets/no-image.jpg";false;"Produto sem descrição.";1
 01.0115;"TAMPO POLIESTER LISO CARAMELO";"TAMPOS E ACESSORIOS";"";"Unidade";false;true;299.00;381.22;22;false;"/assets/no-image.jpg";false;"Produto sem descrição.";1
 01.0116;"ANEL BORRACHA PBA 75/85";"SOLDAVEL MARROM/PPR/PBA";"";"Unidade";false;true;230.00;423.62;46;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
-01.0117;"KIT ARM MGM TULIPA  BCO/CAF� 59 CM";"ARMARIOS";"";"Unidade";false;false;479.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
+01.0117;"KIT ARM MGM TULIPA  BCO/CAFÉ 59Cm";"ARMARIOS";"";"Unidade";false;false;479.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 01.0118;"CANTONEIRA MAO FRANCESA GALV 38X20";"FERRAGENS";"";"Unidade";false;false;13.06;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";6
 01.0119;"VASO JARD SAFIRA 17 AMARELO";"MATERIAIS PLASTICOS";"";"Unidade";false;true;40.69;50.35;19;false;"/assets/no-image.jpg";false;"Produto sem descrição.";1
 01.0121;"VASO JARD CONICO ATENAS 45 PEDRA";"MATERIAIS PLASTICOS";"";"Unidade";false;false;72.65;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";1
-01.0123;"KIT ARM MGM TULIPA AMENDOA 59 CM";"ARMARIOS";"";"Unidade";false;false;479.00;;;false;"/assets/produtos/01.0123.png";false;"Produto sem descrição.";0
+01.0123;"KIT ARM MGM TULIPA AMENDOA 59Cm";"ARMARIOS";"";"Unidade";false;false;479.00;;;false;"/assets/produtos/01.0123.png";false;"Produto sem descrição.";0
 01.0125;"VASO JARD CONICO ALDORA 45 CAFE";"MATERIAIS PLASTICOS";"";"Unidade";false;false;66.95;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";-1
 01.0126;"VASO JARD CONICO ALDORA 45 BEGE";"MATERIAIS PLASTICOS";"";"Unidade";false;false;66.95;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 01.0127;"VASO JARD QUAD APOLO 45 CAFE";"MATERIAIS PLASTICOS";"";"Unidade";false;false;83.44;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
@@ -54,14 +54,14 @@ id;name;category;brand;saleFormat;installmentsNoInterest;flashOffer;price;oldPri
 01.0129;"GABINETE BERGAN 50 CM BRANCO";"LOUCAS E VIDROS";"";"Unidade";false;true;794.82;989.76;20;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 01.0132;"GABINETE BERGAN 50 CM VERMELHO";"LOUCAS E VIDROS";"";"Unidade";false;true;794.82;994.73;20;false;"/assets/no-image.jpg";false;"Produto sem descrição.";1
 01.0133;"BARRA ROSCAVEL 1/4 C/ 3 MTS";"FERRAGENS";"";"Unidade";false;true;21.00;25.47;18;false;"/assets/no-image.jpg";false;"Produto sem descrição.";113
-01.0134;"KIT ARM MGM LIRIO BCO/CAF� 59 CM";"ARMARIOS";"";"Unidade";false;false;389.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
+01.0134;"KIT ARM MGM LIRIO BCO/CAFÉ 59 CM";"ARMARIOS";"";"Unidade";false;false;389.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 01.0135;"GABINETE BERGAN 50 CM PRETO";"LOUCAS E VIDROS";"";"Unidade";false;true;794.82;989.76;20;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 01.0136;"ARMARIO RORATO AEREO BCO 2 PORTAS 56,5 CM";"ARMARIOS";"";"Unidade";false;false;199.00;;;false;"/assets/produtos/01.0136.jpg";false;"Produto sem descrição.";0
 01.0137;"VASO JARD TAMARA 60 BEGE";"MATERIAIS PLASTICOS";"";"Unidade";false;false;60.35;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";-2
 01.0138;"VASO JARD TAMARA 60 CAFE";"MATERIAIS PLASTICOS";"";"Unidade";false;false;60.35;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 01.0140;"PORTA TOALHA 2040 F24 QUADRA PT FOSCO LORENZETTI";"METAIS E TORN LORENZETT";"";"Unidade";false;true;39.90;52.64;24;false;"/assets/no-image.jpg";false;"Produto sem descrição.";7
 01.0141;"KIT ARM MGM IRIS CAFE/BRANCO 44 CM";"ARMARIOS";"";"Unidade";false;false;189.90;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
-01.0142;"KIT ARM MGM HORTENCIA BCO/CAF� 55 CM";"ARMARIOS";"";"Unidade";false;false;299.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
+01.0142;"KIT ARM MGM HORTENCIA BCO/CAFÉ 55 CM";"ARMARIOS";"";"Unidade";false;false;299.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 01.0144;"UNIDUT CONICO ZINCADO 11/2";"CONDULETE ALUMINIO";"";"Unidade";false;true;15.00;19.06;21;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 803202;"TUBO AQUECEDOR 90 MM X 1,5 M";"ACESSORIOS DE AQUECEDOR";"";"Unidade";false;false;81.10;;;false;"/assets/produtos/803202.png";false;"Produto sem descrição.";30
 01.0146;"TAMPA P/CX DAGUA FIBRA 15000 LT";"HIDRAULICO";"";"Unidade";false;true;2589.19;3164.47;18;false;"/assets/produtos/01.0146.png";false;"Produto sem descrição.";0

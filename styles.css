@@ -2254,3 +2254,42 @@ textarea{font-family:inherit}
     font-size: 15px;
   }
 }
+.catalogPagination{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:32px 0 12px;
+  flex-wrap:wrap;
+}
+
+.catalogPageBtn{
+  min-width:120px;
+  height:44px;
+  border:none;
+  border-radius:12px;
+  background:#1d4ed8;
+  color:#fff;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  transition:filter .2s ease, transform .2s ease, opacity .2s ease;
+}
+
+.catalogPageBtn:hover:not(:disabled){
+  filter:brightness(1.05);
+  transform:translateY(-1px);
+}
+
+.catalogPageBtn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.catalogPageInfo{
+  font-size:15px;
+  font-weight:700;
+  color:#0f172a;
+  min-width:120px;
+  text-align:center;
+}
