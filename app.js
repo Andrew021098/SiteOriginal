@@ -25,24 +25,34 @@ const PARTNER_BRANDS = [
 ];
 
 function renderBrands() {
-  const track = document.getElementById("partnersTrack");
-  if (!track) return;
+  const partnersTrack = document.getElementById("partnersTrack");
+  const brandsRow = document.getElementById("brandsRow");
 
-  const brandsForLoop = [...PARTNER_BRANDS, ...PARTNER_BRANDS];
+  if (partnersTrack) {
+    const brandsForLoop = [...PARTNER_BRANDS, ...PARTNER_BRANDS];
 
-  track.innerHTML = brandsForLoop.map((brand) => `
-    <div class="partnerLogoCard" title="${escapeHtml(brand.name)}" aria-label="${escapeHtml(brand.name)}">
-      <img
-        src="${brand.logo}"
-        alt="${escapeHtml(brand.name)}"
-        loading="lazy"
-        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-      />
-      <div class="partnerLogoFallback" style="display:none;">
-        ${escapeHtml(brand.name)}
+    partnersTrack.innerHTML = brandsForLoop.map((brand) => `
+      <div class="partnerLogoCard" title="${escapeHtml(brand.name)}" aria-label="${escapeHtml(brand.name)}">
+        <img
+          src="${brand.logo}"
+          alt="${escapeHtml(brand.name)}"
+          loading="lazy"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+        />
+        <div class="partnerLogoFallback" style="display:none;">
+          ${escapeHtml(brand.name)}
+        </div>
       </div>
-    </div>
-  `).join("");
+    `).join("");
+
+    return;
+  }
+
+  if (brandsRow) {
+    brandsRow.innerHTML = PARTNER_BRANDS.map((brand) => `
+      <div class="brandPill">${escapeHtml(brand.name)}</div>
+    `).join("");
+  }
 }
 
 const API_BASE_URL =
