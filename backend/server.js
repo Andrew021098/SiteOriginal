@@ -9,7 +9,7 @@ const Firebird = require("node-firebird");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const REUTILIZAR_MESMO_VENDEDOR = false;
+const REUTILIZAR_MESMO_VENDEDOR = true; // Configuração para reutilizar o mesmo vendedor enquanto ele estiver ativo
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET || "";
 
 console.log("FIREBIRD_HOST:", process.env.FIREBIRD_HOST);
