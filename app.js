@@ -1868,6 +1868,18 @@ function sanitizeCartAgainstProducts() {
   saveCart();
 }
 
+async function getProductImage(name) {
+  try {
+    const res = await fetch(`/api/image?q=${encodeURIComponent(name)}`);
+    const data = await res.json();
+
+    return data.image || "/assets/no-image.jpg";
+
+  } catch {
+    return "/assets/no-image.jpg";
+  }
+}
+
 async function init() {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());

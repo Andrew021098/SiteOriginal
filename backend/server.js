@@ -47,6 +47,32 @@ const productsFile = path.join(__dirname, "products.json");
    UTILITÁRIOS
 ========================= */
 
+app.get("/api/image", async (req, res) => {
+  const query = req.query.q;
+
+  try {
+    const response = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=1`, {
+      headers: {
+        Authorization: process.env.PEXELS_API_KEY
+      }
+    });
+
+    const data = await response.json();
+
+    if (!data.photos || data.photos.length === 0) {
+      return res.json({ image: null });
+    }
+
+    return res.json({
+      image: data.photos[0].src.medium
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao buscar imagem" });
+  }
+});
+
 function ensureFile(filePath, fallbackData) {
   if (!fs.existsSync(filePath)) {
     fs.writeFileSync(filePath, JSON.stringify(fallbackData, null, 2), "utf-8");
@@ -608,7 +634,6 @@ app.post("/distribuir-lead", (req, res) => {
 *ITENS:*
 ${itensTexto}
 
-*Subtotal:* R$ ${lead.subtotal.toFixed(2)}
 *Total:* R$ ${lead.total.toFixed(2)}
 
 ${formaRecebimento}
