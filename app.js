@@ -864,13 +864,22 @@ function getImageUrl(product) {
   return product.image;
 }
 
+// Ver detalhes
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".productDetailsBtn");
+  if (!btn) return;
+
+  const id = Number(btn.dataset.id);
+  const product = PRODUCTS.find(p => Number(p.id) === id);
+  if (!product) return;
+
+  openProductModal(product);
+});
+
+
 function productCard(product) {
   const hasOff = typeof product.offPct === "number" && product.offPct > 0;
   const hasOld = typeof product.oldPrice === "number" && product.oldPrice > product.price;
-
-  const brandLabel = product.brand
-    ? `<div class="pCategory">${escapeHtml(product.brand)}</div>`
-    : `<div class="pCategory">${escapeHtml(product.category)}</div>`;
 
   const imageUrl = getImageUrl(product);
 
@@ -878,39 +887,57 @@ function productCard(product) {
   card.className = "pCard";
 
   card.innerHTML = `
-    <div class="pImg" style="background-image:url('${imageUrl}')">
-      ${hasOff ? `<div class="badgeOff">${product.offPct}% OFF</div>` : ""}
+  <div class="pImg" style="background-image:url('${imageUrl}')">
+    ${hasOff ? `<div class="badgeOff">${product.offPct}% OFF</div>` : ""}
+  </div>
+
+  <div class="pBody">
+    <div class="pCategory">${escapeHtml(product.brand || product.category || "")}</div>
+
+    <p class="pName" title="${escapeHtml(product.name)}">
+      ${escapeHtml(product.name)}
+    </p>
+
+    <div class="pPrices">
+      ${hasOld ? `<div class="oldPrice">${brl(product.oldPrice)}</div>` : `<div class="oldPrice"></div>`}
+      <div class="newPrice">${brl(product.price)}</div>
     </div>
 
-    <div class="pBody">
-      ${brandLabel}
-      <p class="pName">${escapeHtml(product.name)}</p>
-
-      <div class="pPrices">
-        ${hasOld ? `<div class="oldPrice">${brl(product.oldPrice)}</div>` : `<div class="oldPrice"></div>`}
-        <div class="newPrice">${brl(product.price)}</div>
-      </div>
-
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:auto;">
-        <button class="btn btn--outline productDetailsBtn" type="button">Ver detalhes</button>
-        <button class="addBtn" type="button">
-          <span aria-hidden="true">🛒</span>
-          Adicionar
-        </button>
-      </div>
+    <div class="pInstallment">
+      ${product.installmentsNoInterest ? "em até 10x sem juros" : "à vista"}
     </div>
-  `;
+
+    <div class="pActions">
+      <button class="btn btn--outline productDetailsBtn" type="button" data-id="${product.id}">
+        Ver detalhes
+      </button>
+
+      <button class="addBtn" type="button" data-id="${product.id}">
+        <span aria-hidden="true">🛒</span>
+        <span>Adicionar</span>
+      </button>
+    </div>
+  </div>
+`;
 
   const addBtn = card.querySelector(".addBtn");
-  const detailsBtn = card.querySelector(".productDetailsBtn");
+  const detailButtons = card.querySelectorAll(".productDetailsBtn");
 
-  addBtn.addEventListener("click", () => {
+  addBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
     addToCart(product.id, 1);
     openDrawer();
   });
 
-  detailsBtn.addEventListener("click", () => {
-    openProductModal(product.id);
+  detailButtons.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openProductModal(product);
+    });
+  });
+
+  card.addEventListener("click", () => {
+    openProductModal(product);
   });
 
   return card;
