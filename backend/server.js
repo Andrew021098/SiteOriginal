@@ -122,18 +122,21 @@ function normalizeProduct(product, baseUrl) {
   const imageValue = String(product.image || "").trim();
   const isAbsolute = /^https?:\/\//i.test(imageValue);
 
-  let finalImage = `${baseUrl}/assets/produtos/no-image.jpg`;
+  // 🔥 versão dinâmica pra evitar cache
+  const version = Date.now();
+
+  let finalImage = `${baseUrl}/assets/produtos/no-image.jpg?v=${version}`;
 
   if (imageValue) {
     if (isAbsolute) {
-      finalImage = imageValue;
+      finalImage = `${imageValue}?v=${version}`;
     } else if (imageValue.startsWith("/assets/")) {
-      finalImage = `${baseUrl}${imageValue}`;
+      finalImage = `${baseUrl}${imageValue}?v=${version}`;
     } else if (imageValue.startsWith("./assets/")) {
-      finalImage = `${baseUrl}${imageValue.replace(".", "")}`;
+      finalImage = `${baseUrl}${imageValue.replace(".", "")}?v=${version}`;
     } else {
       const fileName = imageValue.split(/[/\\]/).pop();
-      finalImage = `${baseUrl}/assets/produtos/${fileName}`;
+      finalImage = `${baseUrl}/assets/produtos/${fileName}?v=${version}`;
     }
   }
 
