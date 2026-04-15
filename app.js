@@ -871,16 +871,31 @@ function renderCategories() {
 
 // 🔥 FUNÇÃO NOVA PARA IMAGEM (ADICIONADA)
 function getImageUrl(product) {
-  if (!product.image) {
-    return `${API_BASE_URL}/assets/produtos/no-image.jpg`;
+  const fallback = `${API_BASE_URL}/assets/produtos/no-image.jpg`;
+
+  if (!product || !product.image) return fallback;
+
+  const image = String(product.image).trim();
+
+  if (!image) return fallback;
+
+  if (image.startsWith("http://") || image.startsWith("https://")) {
+    return image;
   }
 
-  // se já vier com /assets
-  if (product.image.startsWith("/")) {
-    return `${API_BASE_URL}${product.image}`;
+  if (image.startsWith("/assets/produtos/")) {
+    return `${API_BASE_URL}${image}`;
   }
 
-  return product.image;
+  if (image.startsWith("/assets/no-image")) {
+    return fallback;
+  }
+
+  if (image.startsWith("/assets/")) {
+    return `${API_BASE_URL}${image}`;
+  }
+
+  return `${API_BASE_URL}/assets/produtos/${image}`;
 }
 
 document.addEventListener("click", (e) => {
@@ -902,9 +917,15 @@ function productCard(product) {
   card.className = "pCard";
 
   card.innerHTML = `
-    <div class="pImg" style="background-image:url('${imageUrl}')">
-      ${hasOff ? `<div class="badgeOff">${product.offPct}% OFF</div>` : ""}
-    </div>
+  <div class="pImg">
+    <img
+      src="${imageUrl}"
+      alt="${escapeHtml(product.name)}"
+      loading="lazy"
+       onerror="this.onerror=null;this.src='${API_BASE_URL}/assets/produtos/no-image.jpg';"
+    />
+    ${hasOff ? `<div class="badgeOff">${product.offPct}% OFF</div>` : ""}
+   </div>
 
     <div class="pBody">
       <div class="pCategory">${escapeHtml(product.brand || product.category || "")}</div>

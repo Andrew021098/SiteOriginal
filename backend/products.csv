@@ -1,9 +1,9 @@
 id;name;category;brand;saleFormat;installmentsNoInterest;flashOffer;price;oldPrice;offPct;freeShip;image;featured;description;stock
 01.0002;"BASCULANTE ALUM BRANCO 40X60";"ALUMINIO";"";"Unidade";false;false;101.07;;;false;"/assets/produtos/01.0002.jpg";false;"Produto sem descrição.";0
-01.0003;"KIT ARM MGM LIRIO BCO 59 CM";"ARMARIOS";"";"Unidade";false;false;299.00;;;false;"/assets/produtos/01.0003.jpg";false;"Produto sem descrição.";0
+01.0003;"KIT ARM MGM LIRIO BCO 59 CM";"ARMARIOS";"";"Unidade";false;false;299.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 01.0005;"BASCULANTE ALUM BRANCO 50X50";"ALUMINIO";"";"Unidade";false;false;102.27;;;false;"/assets/produtos/01.0005.jpg";false;"Produto sem descrição.";0
 01.0006;"ARMARIO RORATO AEREO BCO 3 PORTAS 1,06 MT";"ARMARIOS";"";"Unidade";false;false;349.00;;;false;"/assets/produtos/01.0006.jpg";false;"Produto sem descrição.";3
-01.0007;"BASCULANTE ALUM BRANCO 60X40";"ALUMINIO";"";"Unidade";false;false;113.10;;;false;"/assets/produtos/01.0007.jpg";false;"Produto sem descrição.";0
+01.0007;"BASCULANTE ALUM BRANCO 60X40";"ALUMINIO";"";"Unidade";false;false;113.10;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 01.0008;"PORTA CORTINA BOX 1,20X1,33";"UTILIDADES DO LAR";"";"Unidade";false;false;31.59;;;false;"/assets/produtos/01.0008.jpg";false;"Produto sem descrição.";4
 01.0009;"BAUTECH RODAPE 12 KG";"ADESIVOS";"";"Unidade";false;false;359.84;;;false;"/assets/produtos/01.0009.jpg";false;"Produto sem descrição.";0
 803195;"MARTELETE ROTATIVO MAKITA 127V M8700G";"FERRAMENTAS";"";"Unidade";false;true;1011.30;1348.40;25;false;"/assets/produtos/803195.jpg";false;"Produto sem descrição.";0
@@ -23,7 +23,7 @@ id;name;category;brand;saleFormat;installmentsNoInterest;flashOffer;price;oldPri
 01.0027;"VASO JARD BADI 28 CAFE";"MATERIAIS PLASTICOS";"";"Unidade";false;true;71.11;87.94;19;false;"/assets/no-image.jpg";false;"Produto sem descrição.";2
 01.0028;"RAQUETE ELETRICA MATA MOSQUITO";"FERRAGENS";"";"Unidade";false;true;39.00;52.00;25;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
 01.0029;"BAGUM MT";"ACESSORIOS DE MADEIRA";"";"Unidade";false;true;1.32;1.65;20;false;"/assets/no-image.jpg";false;"Produto sem descrição.";-15
-01.0031;"KIT ARM MGM LIRIO BC/PT 59 CM";"ARMARIOS";"MGM";"Unidade";false;true;499.90;562.49;47;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0
+01.0031;"KIT ARM MGM LIRIO BC/PT 59 CM";"ARMARIOS";"MGM";"Unidade";false;true;499.90;562.49;47;false;"/assets/produtos/01.0003";false;"Produto sem descrição.";0
 01.0032;"GABINETE ASTRA LAV FIT 45X58 BCO";"MATERIAIS PLASTICOS";"";"Unidade";false;false;199.90;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";2
 01.0033;"KIT BANH FABRIMAR PLURATTA 5 PCS";"FABRIMAR";"";"Unidade";false;false;99.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";2
 01.0034;"GABINETE RORATO VERONA 60 C/ESP BG";"ARMARIOS";"";"Unidade";false;false;459.00;;;false;"/assets/produtos/01.0034.png";false;"Produto sem descrição.";2
