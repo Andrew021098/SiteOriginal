@@ -1,8 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 
+// Como este arquivo está dentro da pasta backend:
 const CSV_FILE = path.join(__dirname, "products.csv");
-const JSON_FILE = path.join(__dirname, "backend", "products.json");
+const JSON_FILE = path.join(__dirname, "products.json");
+
+// Como a pasta assets está fora do backend:
+const ASSETS_DIR = path.join(__dirname, "..", "assets", "produtos");
 
 function parseCsvLine(line) {
   const values = [];
