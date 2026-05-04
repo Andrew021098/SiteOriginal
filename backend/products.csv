@@ -3614,11 +3614,11 @@ id;name;category;brand;saleFormat;installmentsNoInterest;flashOffer;price;oldPri
 33.0612;"PE DE CABRA 3/4 X 60";"FERRAMENTAS";"";"Unidade";false;false;39.90;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";8;"";"";"";;
 33.0613;"TALHADEIRA ACO 3/4 X 30";"FERRAMENTAS";"";"Unidade";false;false;19.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";45;"";"";"";;
 33.0614;"DISCO LIXA 5 FUROS 180";"FERRAMENTAS";"";"Unidade";false;true;30.30;37.88;20;false;"/assets/no-image.jpg";false;"Produto sem descrição.";20;"";"";"";;
-33.0615;"ESCADA ALUMINIO 4 DG";"FERRAMENTAS";"";"Unidade";false;false;159.90;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";13;"";"";"";;
-33.0616;"ESCADA ALUMINIO 5 DG";"FERRAMENTAS";"";"Unidade";false;false;199.90;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";10;"";"";"";;
-33.0617;"ESCADA ALUMINIO 6 DG";"FERRAMENTAS";"";"Unidade";false;false;220.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";7;"";"";"";;
+33.0615;"ESCADA ALUMINIO 4 DG";"FERRAMENTAS";"";"Unidade";false;false;159.90;;;false;"/assets/produtos/33.0615";false;"Produto sem descrição.";13;"";"";"";;
+33.0616;"ESCADA ALUMINIO 5 DG";"FERRAMENTAS";"";"Unidade";false;false;199.90;;;false;"/assets/produtos/33.0616";false;"Produto sem descrição.";10;"";"";"";;
+33.0617;"ESCADA ALUMINIO 6 DG";"FERRAMENTAS";"";"Unidade";false;false;220.00;;;false;"/assets/produtos/33.0617";false;"Produto sem descrição.";7;"";"";"";;
 33.0618;"FORCADO 4 DENTES";"FERRAMENTAS";"";"Unidade";false;false;64.29;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";-1;"";"";"";;
-33.0619;"ESCADA ALUMINIO 7 DG";"FERRAMENTAS";"";"Unidade";false;false;259.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";8;"";"";"";;
+33.0619;"ESCADA ALUMINIO 7 DG";"FERRAMENTAS";"";"Unidade";false;false;259.00;;;false;"/assets/produtos/33.0619";false;"Produto sem descrição.";8;"";"";"";;
 33.0620;"ADAPT GAS FEMEA-P/ESPIGAO";"FERRAGENS";"";"Unidade";false;false;30.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";1;"";"";"";;
 33.0621;"ADAPT GAS MACHO";"FERRAGENS";"";"Unidade";false;false;27.87;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";-2;"";"";"";;
 33.0622;"ESPIGAO ABA  PLANA ETERNIT";"TELHAS ONDULADA";"";"Unidade";false;true;51.32;64.37;20;false;"/assets/no-image.jpg";false;"Produto sem descrição.";-17;"";"";"";;
@@ -3627,7 +3627,7 @@ id;name;category;brand;saleFormat;installmentsNoInterest;flashOffer;price;oldPri
 33.0625;"METALON REDONDO 21/2 (3 MM)";"FERRO E A�O";"";"Unidade";false;false;504.84;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";0;"";"";"";;
 33.0626;"VASSOURA JARDIM ACO 18 ARAMES TRAMONTINA";"FERRAMENTAS";"";"Unidade";false;false;29.90;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";4;"";"";"";;
 33.0627;"GRAFITE EM PO 25 G";"FERRAMENTAS";"";"Unidade";false;false;7.04;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";11;"";"";"";;
-33.0628;"ESCADA ALUMINIO 3 DG";"FERRAMENTAS";"";"Unidade";false;false;129.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";3;"";"";"";;
+33.0628;"ESCADA ALUMINIO 3 DG";"FERRAMENTAS";"";"Unidade";false;false;129.00;;;false;"/assets/produtos/33.0628";false;"Produto sem descrição.";3;"";"";"";;
 33.0629;"FORMAO 1/4";"FERRAMENTAS";"";"Unidade";false;true;19.51;26.82;27;false;"/assets/no-image.jpg";false;"Produto sem descrição.";6;"";"";"";;
 33.0630;"RODA C/ PNEU MACI�O P/CARRINHO MAO 1""  REF 325X65";"FERRAMENTAS";"";"Unidade";false;false;63.50;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";23;"";"";"";;
 33.0631;"PNEU S/ CAMARA P/CARRINHO MAO 3,25 X 8";"FERRAMENTAS";"";"Unidade";false;false;53.00;;;false;"/assets/no-image.jpg";false;"Produto sem descrição.";29;"";"";"";;
