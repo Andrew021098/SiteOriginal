@@ -2,37 +2,37 @@
   "vendedores": [
     {
       "id": 1,
-      "nome": "Andrew",
-      "telefone": "5521983297268",
+      "nome": "Lenon",
+      "telefone": "5521975847628",
       "ativo": true,
       "ordem": 1
     },
     {
       "id": 2,
-      "nome": "Andrew",
-      "telefone": "5521983297268",
+      "nome": "Jaqueline",
+      "telefone": "5521996684430",
       "ativo": true,
       "ordem": 2
     },
     {
       "id": 3,
-      "nome": "Andrew",
-      "telefone": "5521983297268",
-      "ativo": false,
+      "nome": "Rogerio",
+      "telefone": "55219991066623",
+      "ativo": true,
       "ordem": 3
     },
     {
       "id": 4,
-      "nome": "Andrew",
-      "telefone": "5521983297268",
+      "nome": "Janaina",
+      "telefone": "55219981540316",
       "ativo": true,
       "ordem": 4
     },
     {
       "id": 5,
-      "nome": "Andrew",
-      "telefone": "5521983297268",
-      "ativo": false,
+      "nome": "Rafaely",
+      "telefone": "558581556710",
+      "ativo": true,
       "ordem": 5
     }
   ]

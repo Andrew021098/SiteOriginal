@@ -384,6 +384,14 @@ async function sendBudgetToWhatsApp() {
 
   if (!validateCheckoutData(data)) return;
 
+  // Meta Pixel - Lead enviado
+if (typeof fbq !== "undefined") {
+  fbq("track", "Lead", {
+    content_name: "Orçamento WhatsApp",
+    currency: "BRL"
+  });
+}
+
   const btn = document.getElementById("checkoutWhatsBtn");
 
   if (btn) {
