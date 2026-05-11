@@ -521,7 +521,9 @@ app.get("/api/products-db", requireInternalApiKey, async (req, res) => {
 
     const rows = await firebirdQuery(sql);
     console.log("COLUNAS REAIS DA VIEW:", rows);
-    let products = rows.map(mapFirebirdRowToProduct).filter((product) => product.name);
+    let products = rows
+      .map(mapFirebirdRowToProduct)
+      .filter((product) => product.name && Number(product.stock) >= 0);
 
     if (search) {
       products = products.filter((product) =>
