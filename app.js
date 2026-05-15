@@ -898,15 +898,6 @@ function getImageUrl(product) {
   return `${API_BASE_URL}/assets/produtos/${image}`;
 }
 
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".productDetailsBtn");
-  if (!btn) return;
-
-  const id = String(btn.dataset.id).trim();
-  openProductModal(id);
-});
-
-
 function productCard(product) {
   const hasOff = typeof product.offPct === "number" && product.offPct > 0;
   const hasOld = typeof product.oldPrice === "number" && product.oldPrice > product.price;
@@ -944,9 +935,9 @@ function productCard(product) {
       </div>
 
       <div class="pActions">
-        <button class="btn btn--outline productDetailsBtn" type="button" data-id="${escapeHtml(String(product.id))}">
-          Ver detalhes
-        </button>
+  <button class="btn btn--outline productDetailsBtn" type="button" data-id="${escapeHtml(String(product.id))}">
+    Ver detalhes
+  </button>
 
         <button class="addBtn" type="button" data-id="${escapeHtml(String(product.id))}">
           <span aria-hidden="true">🛒</span>
@@ -956,23 +947,27 @@ function productCard(product) {
     </div>
   `;
 
-  const addBtn = card.querySelector(".addBtn");
-  const detailsBtn = card.querySelector(".productDetailsBtn");
+ const addBtn = card.querySelector(".addBtn");
+ const detailsBtn = card.querySelector(".productDetailsBtn");
 
+ if (addBtn) {
   addBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     addToCart(product.id, 1);
     openDrawer();
   });
+ }
 
+ if (detailsBtn) {
   detailsBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     openProductModal(product.id);
   });
+ }
 
-  card.addEventListener("click", () => {
-    openProductModal(product.id);
-  });
+ card.addEventListener("click", () => {
+  openProductModal(product.id);
+ });
 
   return card;
 }
@@ -1513,15 +1508,38 @@ function setupDrawer() {
   }
 }
 
-function openProductModal(productId) {
-  const key = String(productId).trim();
+function getProductModalDescription(product) {
+  const description = String(product?.description || "").trim();
 
-  const product =
+  if (
+    !description ||
+    description.toLowerCase() === "produto sem descrição." ||
+    description.toLowerCase() === "produto sem descrição" ||
+    description.toLowerCase() === "sem descrição disponível."
+  ) {
+    return "Não tem descrição.";
+  }
+
+  return description;
+}
+
+function findProductById(productId) {
+  const key = String(productId || "").trim();
+
+  return (
     PRODUCTS.find((p) => String(p.id).trim() === key) ||
     catalogLoadedProducts.find((p) => String(p.id).trim() === key) ||
-    offersLoadedProducts.find((p) => String(p.id).trim() === key);
+    offersLoadedProducts.find((p) => String(p.id).trim() === key)
+  );
+}
 
-  if (!product) return;
+function openProductModal(productId) {
+  const product = findProductById(productId);
+
+  if (!product) {
+    console.warn("Produto não encontrado para detalhes:", productId);
+    return;
+  }
 
   currentModalProduct = product;
 
@@ -1532,19 +1550,32 @@ function openProductModal(productId) {
   const description = document.getElementById("productModalDescription");
   const oldPrice = document.getElementById("productModalOldPrice");
   const price = document.getElementById("productModalPrice");
+  const stock = document.getElementById("productModalStock");
   const addBtn = document.getElementById("productModalAddBtn");
 
   if (!modal || !image || !category || !title || !description || !oldPrice || !price || !addBtn) {
+    console.warn("HTML do modal não encontrado. Confira os IDs no catalogo.html.");
     return;
   }
 
   image.src = getImageUrl(product);
-  image.alt = product.name || "Produto";
+  image.alt = product.name || "Produto Conde de Bonfim";
+
   category.textContent = product.brand || product.category || "Produto";
-  title.textContent = product.name || "Produto";
-  description.textContent = product.description || "Sem descrição disponível.";
-  oldPrice.textContent = product.oldPrice ? brl(product.oldPrice) : "";
+  title.textContent = product.name || "Produto sem nome";
+  description.textContent = getProductModalDescription(product);
+
+  oldPrice.textContent =
+    product.oldPrice && Number(product.oldPrice) > Number(product.price)
+      ? brl(product.oldPrice)
+      : "";
+
   price.textContent = brl(product.price);
+
+  if (stock) {
+    const stockValue = Number(product.stock || 0);
+    stock.textContent = `Estoque disponível: ${stockValue}`;
+  }
 
   addBtn.onclick = () => {
     addToCart(product.id, 1);
@@ -1568,6 +1599,8 @@ function closeProductModal() {
   if (!drawer || !drawer.classList.contains("is-open")) {
     document.body.style.overflow = "";
   }
+
+  currentModalProduct = null;
 }
 
 function setupProductModal() {
@@ -1575,8 +1608,13 @@ function setupProductModal() {
   const closeBtn = document.getElementById("productModalClose");
   const backdrop = document.getElementById("productModalBackdrop");
 
-  if (closeBtn) closeBtn.addEventListener("click", closeProductModal);
-  if (backdrop) backdrop.addEventListener("click", closeProductModal);
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeProductModal);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener("click", closeProductModal);
+  }
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && modal?.classList.contains("is-open")) {

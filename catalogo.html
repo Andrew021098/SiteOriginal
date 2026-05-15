@@ -559,6 +559,42 @@
     </div>
   </main>
 
+<!-- Modal de detalhes do produto -->
+<div class="productModal" id="productModal" aria-hidden="true">
+  <div class="productModalOverlay" id="productModalOverlay"></div>
+
+  <div class="productModalBox" role="dialog" aria-modal="true">
+    <button class="productModalClose" id="productModalClose" type="button">
+      ×
+    </button>
+
+    <div class="productModalContent">
+      <div class="productModalImageWrap">
+        <img id="modalProductImage" src="" alt="" />
+      </div>
+
+      <div class="productModalInfo">
+        <span class="productModalCategory" id="modalProductCategory"></span>
+
+        <h2 id="modalProductName"></h2>
+
+        <p class="productModalDescription" id="modalProductDescription"></p>
+
+        <div class="productModalPrice">
+          <strong id="modalProductPrice"></strong>
+          <span>à vista</span>
+        </div>
+
+        <p class="productModalStock" id="modalProductStock"></p>
+
+        <button class="productModalAddBtn" id="modalProductAddBtn" type="button">
+          🛒 Adicionar ao carrinho
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
   <script src="./app.js"></script>
 </body>
 </html>
