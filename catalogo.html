@@ -276,10 +276,10 @@
               </button>
 
               <div class="priceRangeBox">
-                <input type="number" id="priceMin" placeholder="Mínimo">
+                <input type="number" id="priceMinInput" placeholder="Mínimo">
                 <span class="priceRangeSeparator">—</span>
-                <input type="number" id="priceMax" placeholder="Máximo">
-                <button type="button" id="applyPriceRange" class="priceApplyBtn">›</button>
+                <input type="number" id="priceMaxInput" placeholder="Máximo">
+                <button type="button" id="applyPriceFilterBtn" class="priceApplyBtn">›</button>
               </div>
             </div>
 
@@ -287,7 +287,7 @@
               <h3 class="filterSection__title">Tipo de promoção</h3>
 
               <label class="filterCheckItem">
-                <input type="checkbox" id="filterFlashOffer">
+                <input type="checkbox" id="flashOfferFilter">
                 <span>Oferta relâmpago</span>
               </label>
             </div>
@@ -447,9 +447,6 @@
       <span class="floatingCart__badge" id="floatingCartCount">0</span>
     </button>
 
-    <div class="productModal" id="productModal" aria-hidden="true">
-      <div class="productModal__backdrop" id="productModalBackdrop"></div>
-
       <div class="productModal__panel">
         <div class="productModal__head">
           <strong id="modalProductName">Produto</strong>
@@ -561,33 +558,34 @@
 
 <!-- Modal de detalhes do produto -->
 <div class="productModal" id="productModal" aria-hidden="true">
-  <div class="productModalOverlay" id="productModalOverlay"></div>
+  <div class="productModalBackdrop" id="productModalBackdrop"></div>
 
-  <div class="productModalBox" role="dialog" aria-modal="true">
-    <button class="productModalClose" id="productModalClose" type="button">
+  <div class="productModalBox" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+    <button class="productModalClose" id="productModalClose" type="button" aria-label="Fechar detalhes do produto">
       ×
     </button>
 
     <div class="productModalContent">
       <div class="productModalImageWrap">
-        <img id="modalProductImage" src="" alt="" />
+        <img id="productModalImage" src="" alt="" />
       </div>
 
       <div class="productModalInfo">
-        <span class="productModalCategory" id="modalProductCategory"></span>
+        <span class="productModalCategory" id="productModalCategory"></span>
 
-        <h2 id="modalProductName"></h2>
+        <h2 id="productModalTitle"></h2>
 
-        <p class="productModalDescription" id="modalProductDescription"></p>
+        <p class="productModalDescription" id="productModalDescription"></p>
 
-        <div class="productModalPrice">
-          <strong id="modalProductPrice"></strong>
-          <span>à vista</span>
+        <div class="productModalPrices">
+          <span class="productModalOldPrice" id="productModalOldPrice"></span>
+          <strong class="productModalPrice" id="productModalPrice"></strong>
+          <small>à vista</small>
         </div>
 
-        <p class="productModalStock" id="modalProductStock"></p>
+        <p class="productModalStock" id="productModalStock"></p>
 
-        <button class="productModalAddBtn" id="modalProductAddBtn" type="button">
+        <button class="productModalAddBtn" id="productModalAddBtn" type="button">
           🛒 Adicionar ao carrinho
         </button>
       </div>
