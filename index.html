@@ -198,26 +198,53 @@
   </header>
 
   <main id="inicio">
-    <section class="hero">
-      <div class="container hero__inner">
-        <div class="hero__left">
-          <h1>Tudo para sua obra em um só lugar</h1>
-          <p>
-            Materiais de construção de qualidade com os melhores preços do Rio de Janeiro.
-            Entrega rápida e retirada na loja.
-          </p>
+    <section class="hero heroAds" id="heroAds">
+  <div class="container heroAds__wrap">
 
-          <div class="hero__actions">
-            <a class="btn btn--yellow" href="./catalogo.html">Ver Produtos <span aria-hidden="true">→</span></a>
-            <a class="btn btn--white" href="#ofertas">Promoções</a>
-          </div>
-        </div>
+    <button class="heroAds__arrow heroAds__arrow--left" id="heroPrevBtn" type="button" aria-label="Slide anterior">
+      ‹
+    </button>
 
-        <div class="hero__right">
-          <div class="hero__image" role="img" aria-label="Imagem de obra"></div>
-        </div>
+    <div class="heroAds__content">
+      <span class="heroAds__eyebrow" id="heroEyebrow">
+        Materiais de construção
+      </span>
+
+      <h1 id="heroTitle">
+        Tudo para sua obra em um só lugar
+      </h1>
+
+      <p id="heroText">
+        Materiais de construção de qualidade com os melhores preços do Rio de Janeiro.
+        Entrega rápida e retirada na loja.
+      </p>
+
+      <div class="heroAds__actions">
+        <a class="btn btn--yellow" id="heroPrimaryBtn" href="./catalogo.html">
+          Ver Produtos →
+        </a>
+
+        <a class="btn btn--white" id="heroSecondaryBtn" href="./catalogo.html">
+          Promoções
+        </a>
       </div>
-    </section>
+    </div>
+
+    <div class="heroAds__imageBox">
+      <img
+        id="heroImage"
+        src="./assets/hero.jpg"
+        alt="Conde de Bonfim - Materiais de construção"
+      />
+    </div>
+
+    <button class="heroAds__arrow heroAds__arrow--right" id="heroNextBtn" type="button" aria-label="Próximo slide">
+      ›
+    </button>
+
+    <div class="heroAds__dots" id="heroDots"></div>
+  </div>
+</section>
 
     <section class="benefits" aria-label="Benefícios">
       <div class="container benefits__inner">

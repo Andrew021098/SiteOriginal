@@ -19,9 +19,10 @@ const PARTNER_BRANDS = [
   { name: "Suvinil", logo: "./assets/brands/suvinil.png" },
   { name: "Tramontina", logo: "./assets/brands/tramontina.png" },
   { name: "Deca", logo: "./assets/brands/deca.png" },
-  { name: "Gerdau", logo: "./assets/brands/gerdau.png" },
-  { name: "Portobello", logo: "./assets/brands/portobello.png" },
-  { name: "Atlas", logo: "./assets/brands/atlas.png" }
+  { name: "Atlas", logo: "./assets/brands/atlas.png" },
+  { name: "Lorenzetti", logo: "./assets/brands/lorenzetti.png" },
+  { name: "Quartzolit", logo: "./assets/brands/quartzolit.png" },
+  { name: "Viapol", logo: "./assets/brands/viapol.png" }
 ];
 
 function renderBrands() {
@@ -1982,11 +1983,195 @@ async function getProductImage(name) {
   }
 }
 
+const HERO_ADS = [
+  {
+    eyebrow: "Materiais de construção",
+    title: "Tudo para sua obra em um só lugar",
+    text: "Materiais de construção de qualidade com os melhores preços do Rio de Janeiro. Entrega rápida e retirada na loja.",
+    image: "./assets/hero.jpg",
+    imageAlt: "Fachada da Conde de Bonfim",
+    primaryText: "Ver Produtos →",
+    primaryHref: "./catalogo.html",
+    secondaryText: "Promoções",
+    secondaryHref: "./catalogo.html"
+  },
+  {
+    eyebrow: "Aluguel de caçambas",
+    title: "Caçambas estacionárias para sua obra",
+    text: "Aluguel de caçambas para reformas, obras, retirada de entulho e descarte de resíduos da construção civil.",
+    image: "./assets/banner-cacambas.jpg",
+    imageAlt: "Aluguel de caçambas estacionárias",
+    primaryText: "Solicitar Orçamento",
+    primaryHref: "https://wa.me/5521959039201?text=Olá! Tenho interesse em aluguel de caçamba estacionária.",
+    secondaryText: "Ver Catálogo",
+    secondaryHref: "./catalogo.html"
+  },
+  {
+    eyebrow: "Ofertas especiais",
+    title: "Promoções para economizar na obra",
+    text: "Confira produtos selecionados com preços especiais para construção, reforma e manutenção.",
+    image: "./assets/banner-promocoes.jpg",
+    imageAlt: "Promoções em materiais de construção",
+    primaryText: "Ver Promoções",
+    primaryHref: "./catalogo.html",
+    secondaryText: "Falar no WhatsApp",
+    secondaryHref: "https://wa.me/5521959039201?text=Olá! Vim pelo site e quero consultar promoções."
+  }
+];
+
+let currentHeroAdIndex = 0;
+let heroAdTimer = null;
+
+function renderHeroAd(index) {
+  const ad = HERO_ADS[index];
+
+  const content = document.querySelector(".heroAds__content");
+  const imageBox = document.querySelector(".heroAds__imageBox");
+
+  const eyebrow = document.getElementById("heroEyebrow");
+  const title = document.getElementById("heroTitle");
+  const text = document.getElementById("heroText");
+  const image = document.getElementById("heroImage");
+  const primaryBtn = document.getElementById("heroPrimaryBtn");
+  const secondaryBtn = document.getElementById("heroSecondaryBtn");
+
+  if (!ad || !content || !imageBox || !eyebrow || !title || !text || !image || !primaryBtn || !secondaryBtn) {
+    return;
+  }
+
+  content.classList.add("is-changing");
+  imageBox.classList.add("is-changing");
+
+  setTimeout(() => {
+    eyebrow.textContent = ad.eyebrow;
+    title.textContent = ad.title;
+    text.textContent = ad.text;
+
+    image.src = ad.image;
+    image.alt = ad.imageAlt;
+
+    primaryBtn.textContent = ad.primaryText;
+    primaryBtn.href = ad.primaryHref;
+
+    secondaryBtn.textContent = ad.secondaryText;
+    secondaryBtn.href = ad.secondaryHref;
+
+    const isExternalPrimary = ad.primaryHref.startsWith("http");
+    const isExternalSecondary = ad.secondaryHref.startsWith("http");
+
+    primaryBtn.target = isExternalPrimary ? "_blank" : "";
+    primaryBtn.rel = isExternalPrimary ? "noopener noreferrer" : "";
+
+    secondaryBtn.target = isExternalSecondary ? "_blank" : "";
+    secondaryBtn.rel = isExternalSecondary ? "noopener noreferrer" : "";
+
+    currentHeroAdIndex = index;
+
+    renderHeroDots();
+
+    content.classList.remove("is-changing");
+    imageBox.classList.remove("is-changing");
+
+    content.style.animation = "none";
+    imageBox.style.animation = "none";
+
+    void content.offsetWidth;
+    void imageBox.offsetWidth;
+
+    content.style.animation = "";
+    imageBox.style.animation = "";
+  }, 220);
+}
+
+function nextHeroAd() {
+  const nextIndex = (currentHeroAdIndex + 1) % HERO_ADS.length;
+  renderHeroAd(nextIndex);
+}
+
+function prevHeroAd() {
+  const prevIndex =
+    currentHeroAdIndex === 0
+      ? HERO_ADS.length - 1
+      : currentHeroAdIndex - 1;
+
+  renderHeroAd(prevIndex);
+}
+
+function renderHeroDots() {
+  const dots = document.getElementById("heroDots");
+  if (!dots) return;
+
+  dots.innerHTML = HERO_ADS.map((_, index) => `
+    <button
+      type="button"
+      class="heroAds__dot ${index === currentHeroAdIndex ? "is-active" : ""}"
+      aria-label="Ir para publicidade ${index + 1}"
+      data-hero-index="${index}"
+    ></button>
+  `).join("");
+
+  dots.querySelectorAll(".heroAds__dot").forEach((dot) => {
+    dot.addEventListener("click", () => {
+      const index = Number(dot.dataset.heroIndex);
+      stopHeroAutoplay();
+      renderHeroAd(index);
+      startHeroAutoplay();
+    });
+  });
+}
+
+function startHeroAutoplay() {
+  stopHeroAutoplay();
+
+  heroAdTimer = setInterval(() => {
+    nextHeroAd();
+  }, 6000);
+}
+
+function stopHeroAutoplay() {
+  if (heroAdTimer) {
+    clearInterval(heroAdTimer);
+    heroAdTimer = null;
+  }
+}
+
+function setupHeroAds() {
+  const hero = document.getElementById("heroAds");
+  const prevBtn = document.getElementById("heroPrevBtn");
+  const nextBtn = document.getElementById("heroNextBtn");
+
+  if (!hero) return;
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      stopHeroAutoplay();
+      prevHeroAd();
+      startHeroAutoplay();
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      stopHeroAutoplay();
+      nextHeroAd();
+      startHeroAutoplay();
+    });
+  }
+
+  hero.addEventListener("mouseenter", stopHeroAutoplay);
+  hero.addEventListener("mouseleave", startHeroAutoplay);
+
+  renderHeroAd(0);
+  startHeroAutoplay();
+}
+
 async function init() {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
   exposeAppApi();
+
+  setupHeroAds();
 
   loadCart();
   setupSearch();
