@@ -3025,8 +3025,8 @@ textarea{font-family:inherit}
 }
 
 .productModalImageWrap {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border: 1px solid #e6e4e4;
   border-radius: 20px;
   min-height: 360px;
   display: flex;
