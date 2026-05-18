@@ -2016,7 +2016,7 @@ const HERO_ADS = [
     primaryHref: "./catalogo.html",
     secondaryText: "Falar no WhatsApp",
     secondaryHref: "https://wa.me/5521959039201?text=Olá! Vim pelo site e quero consultar promoções."
-  }
+  },
 ];
 
 let currentHeroAdIndex = 0;
