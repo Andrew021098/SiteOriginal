@@ -201,10 +201,6 @@
     <section class="hero heroAds" id="heroAds">
   <div class="container heroAds__wrap">
 
-    <button class="heroAds__arrow heroAds__arrow--left" id="heroPrevBtn" type="button" aria-label="Slide anterior">
-      ‹
-    </button>
-
     <div class="heroAds__content">
       <span class="heroAds__eyebrow" id="heroEyebrow">
         Materiais de construção
@@ -237,13 +233,17 @@
         alt="Conde de Bonfim - Materiais de construção"
       />
     </div>
+<div class="heroAds__controls">
+  <button class="heroAds__arrow heroAds__arrow--left" id="heroPrevBtn" type="button" aria-label="Slide anterior">
+    ‹
+  </button>
 
-    <button class="heroAds__arrow heroAds__arrow--right" id="heroNextBtn" type="button" aria-label="Próximo slide">
-      ›
-    </button>
+  <div class="heroAds__dots" id="heroDots"></div>
 
-    <div class="heroAds__dots" id="heroDots"></div>
-  </div>
+  <button class="heroAds__arrow heroAds__arrow--right" id="heroNextBtn" type="button" aria-label="Próximo slide">
+    ›
+  </button>
+</div>
 </section>
 
     <section class="benefits" aria-label="Benefícios">
@@ -291,6 +291,37 @@
 
     <div class="partnersMarquee">
       <div class="partnersMarquee__track" id="partnersTrack"></div>
+    </div>
+  </div>
+</section>
+
+<section class="cacambasSection" id="cacambas">
+  <div class="container">
+    <div class="cacambasCard">
+      <div class="cacambasContent">
+        <span class="cacambasTag">Aluguel de Caçambas</span>
+
+        <h2>Aluguel de Caçambas Estacionárias no Rio de Janeiro</h2>
+
+        <p>
+          A Conde de Bonfim também oferece aluguel de caçambas estacionárias para obras,
+          reformas, retirada de entulho e descarte de resíduos da construção civil.
+          Consulte disponibilidade, valores e condições de entrega pelo WhatsApp.
+        </p>
+
+        <a
+          class="cacambasBtn"
+          href="https://wa.me/5521986510686?text=Olá! Vim pelo site. Tenho interesse em alugar uma caçamba."
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Solicitar orçamento
+        </a>
+      </div>
+
+      <div class="cacambasImage">
+        <img src="./assets/banner-cacambas.jpg" alt="Aluguel de caçambas estacionárias no Rio de Janeiro">
+      </div>
     </div>
   </div>
 </section>
@@ -360,20 +391,6 @@
       </div>
     </section>
 
-    <section class="service-section" id="cacambas">
-  <div class="container">
-     <h2>Aluguel de Caçambas Estacionárias no Rio de Janeiro</h2>
-        <p>
-          A Conde de Bonfim também oferece aluguel de caçambas estacionárias para obras,
-          reformas, retirada de entulho e descarte de resíduos da construção civil.
-          Consulte disponibilidade, valores e condições de entrega pelo WhatsApp.
-        </p>
-       <a href="catalogo.html" class="btn-primary">
-         Solicitar orçamento
-       </a>
-      </div>
-    </section>
-
     <footer class="footer" id="contato">
       <div class="container footer__grid">
         <div class="footer__col" id="sobre">
@@ -425,7 +442,7 @@
             <span aria-hidden="true">
              <span aria-hidden="true">✒️</span>
          <strong>Andrew Melo -</strong>
-    <span>Desing Full Stack</span>
+    <span>Full Stack</span>
   </div> 
 </div>
           </div>
