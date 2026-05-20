@@ -3157,6 +3157,7 @@ textarea{font-family:inherit}
   color: #ffffff;
   padding: 42px 0 24px;
   overflow: hidden;
+  transition: background 0.45s ease;
 }
 
 .heroAds__wrap {

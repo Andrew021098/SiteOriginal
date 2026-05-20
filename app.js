@@ -1982,6 +1982,8 @@ async function getProductImage(name) {
     return "/assets/no-image.jpg";
   }
 }
+const HERO_DEFAULT_BACKGROUND = "linear-gradient(135deg, #0f2972 0%, #150f6b 55%, #3d3bc4 100%)";
+const HERO_VIAPOL_BACKGROUND = "linear-gradient(135deg, #063f2a 0%, #0f6b3d 55%, #9ac43b 100%)";
 
 const HERO_ADS = [
   {
@@ -1993,7 +1995,8 @@ const HERO_ADS = [
     primaryText: "Ver Produtos →",
     primaryHref: "./catalogo.html",
     secondaryText: "Promoções",
-    secondaryHref: "./catalogo.html"
+    secondaryHref: "./catalogo.html",
+    background: HERO_DEFAULT_BACKGROUND
   },
   {
     eyebrow: "Aluguel de caçambas",
@@ -2004,7 +2007,8 @@ const HERO_ADS = [
     primaryText: "Solicitar Orçamento",
     primaryHref: "https://wa.me/5521959039201?text=Olá! Tenho interesse em aluguel de caçamba estacionária.",
     secondaryText: "Ver Catálogo",
-    secondaryHref: "./catalogo.html"
+    secondaryHref: "./catalogo.html",
+    background: HERO_DEFAULT_BACKGROUND
   },
   {
     eyebrow: "Ofertas especiais",
@@ -2015,8 +2019,22 @@ const HERO_ADS = [
     primaryText: "Ver Promoções",
     primaryHref: "./catalogo.html",
     secondaryText: "Falar no WhatsApp",
-    secondaryHref: "https://wa.me/5521959039201?text=Olá! Vim pelo site e quero consultar promoções."
+    secondaryHref: "https://wa.me/5521959039201?text=Olá! Vim pelo site e quero consultar promoções.",
+    background: HERO_DEFAULT_BACKGROUND
   },
+  {
+  eyebrow: "Soluções Viapol para sua obra",
+  title: "Impermeabilização com qualidade profissional",
+  text: "Conheça a linha Viapol disponível na Conde de Bonfim e encontre produtos para proteger, vedar e valorizar sua construção.",
+  image: "./assets/banner-viapol-desktop.jpg",
+  imageMobile: "./assets/banner-viapol-mobile.jpg",
+  imageAlt: "Produtos Viapol na Conde de Bonfim",
+  primaryText: "Ver Produtos Viapol",
+  primaryHref: "./catalogo.html?search=Viapol",
+  secondaryText: "Falar no WhatsApp",
+  secondaryHref: "https://wa.me/5521959039201?text=Olá! Quero saber mais sobre os produtos Viapol.",
+  background: HERO_VIAPOL_BACKGROUND
+  }
 ];
 
 let currentHeroAdIndex = 0;
@@ -2025,8 +2043,10 @@ let heroAdTimer = null;
 function renderHeroAd(index) {
   const ad = HERO_ADS[index];
 
+  const HERO_DEFAULT_BACKGROUND = "linear-gradient(180deg, #244fbe, #1f4bb8)"
   const content = document.querySelector(".heroAds__content");
   const imageBox = document.querySelector(".heroAds__imageBox");
+  const hero = document.getElementById("heroAds");
 
   const eyebrow = document.getElementById("heroEyebrow");
   const title = document.getElementById("heroTitle");
@@ -2043,6 +2063,10 @@ function renderHeroAd(index) {
   imageBox.classList.add("is-changing");
 
   setTimeout(() => {
+    if (hero && ad.background) {
+     hero.style.background = ad.background || HERO_DEFAULT_BACKGROUND;
+    }
+    
     eyebrow.textContent = ad.eyebrow;
     title.textContent = ad.title;
     text.textContent = ad.text;
