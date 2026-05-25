@@ -352,14 +352,116 @@ function getCatalogTotalPages() {
   return Math.max(1, Math.ceil(Number(catalogLastTotal || 0) / Number(catalogLimit || 1)));
 }
 function renderCatalogPagination() {
+  const pagination = document.getElementById("catalogPagination");
+  if (!pagination) return;
+
+  const totalPages = getCatalogTotalPages();
+
+  if (totalPages <= 1) {
+    pagination.innerHTML = "";
+    pagination.style.display = "none";
+    return;
+  }
+
+  pagination.style.display = "flex";
+
+  const maxVisiblePages = 5;
+
+  let startPage = Math.max(1, catalogPage - Math.floor(maxVisiblePages / 2));
+  let endPage = startPage + maxVisiblePages - 1;
+
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+
+  const pageButtons = [];
+
+  for (let page = startPage; page <= endPage; page++) {
+    pageButtons.push(`
+      <button
+        type="button"
+        class="catalogNumberBtn ${page === catalogPage ? "is-active" : ""}"
+        data-page="${page}"
+        aria-label="Ir para página ${page}"
+        ${page === catalogPage ? 'aria-current="page"' : ""}
+      >
+        ${page}
+      </button>
+    `);
+  }
+
+  pagination.innerHTML = `
+    <button
+      id="catalogPrevBtn"
+      class="catalogPageBtn"
+      type="button"
+      ${catalogPage <= 1 ? "disabled" : ""}
+    >
+      Anterior
+    </button>
+
+    <div class="catalogNumbers">
+      ${pageButtons.join("")}
+    </div>
+
+    <button
+      id="catalogNextBtn"
+      class="catalogPageBtn"
+      type="button"
+      ${catalogPage >= totalPages ? "disabled" : ""}
+    >
+      Próxima
+    </button>
+  `;
+
   const prevBtn = document.getElementById("catalogPrevBtn");
   const nextBtn = document.getElementById("catalogNextBtn");
-  const pageInfo = document.getElementById("catalogPageInfo");
-  if (!prevBtn || !nextBtn || !pageInfo) return;
-  const totalPages = getCatalogTotalPages();
-  pageInfo.textContent = `Página ${catalogPage} de ${totalPages}`;
-  prevBtn.disabled = catalogPage <= 1;
-  nextBtn.disabled = catalogPage >= totalPages || totalPages === 0;
+  const numberBtns = pagination.querySelectorAll(".catalogNumberBtn");
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", async () => {
+      if (catalogPage <= 1 || catalogLoading) return;
+
+      catalogPage -= 1;
+      await loadCatalogPage(false);
+
+      document.getElementById("catalogGrid")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", async () => {
+      if (catalogPage >= totalPages || catalogLoading) return;
+
+      catalogPage += 1;
+      await loadCatalogPage(false);
+
+      document.getElementById("catalogGrid")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+  }
+
+  numberBtns.forEach((button) => {
+    button.addEventListener("click", async () => {
+      const page = Number(button.dataset.page);
+
+      if (!page || page === catalogPage || catalogLoading) return;
+
+      catalogPage = page;
+      await loadCatalogPage(false);
+
+      document.getElementById("catalogGrid")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+  });
 }
 function setupCatalogPagination() {
   const prevBtn = document.getElementById("catalogPrevBtn");
@@ -1449,40 +1551,43 @@ function setupAdvancedCatalogFilters() {
 function ensureCatalogPagination() {
   const grid = document.getElementById("catalogGrid");
   if (!grid) return;
+
   let pagination = document.getElementById("catalogPagination");
+
   if (!pagination) {
     pagination = document.createElement("div");
     pagination.id = "catalogPagination";
     pagination.className = "catalogPagination";
-    pagination.innerHTML = `
-      <button id="catalogPrevBtn" class="catalogPageBtn" type="button">Anterior</button>
-      <span id="catalogPageInfo" class="catalogPageInfo">Página 1 de 1</span>
-      <button id="catalogNextBtn" class="catalogPageBtn" type="button">Próxima</button>
-    `;
     grid.insertAdjacentElement("afterend", pagination);
   }
+
   const loader = document.getElementById("catalogLoader");
   if (loader) {
     loader.style.display = "none";
   }
+
   const sentinel = document.getElementById("catalogInfiniteSentinel");
   if (sentinel) {
     sentinel.style.display = "none";
   }
 }
+
 function setupCatalog() {
   const grid = document.getElementById("catalogGrid");
   if (!grid) return;
+
   const sortSelect = document.getElementById("catalogSort");
+
   renderCatalogCategoryFilters();
   ensureCatalogPagination();
-  setupCatalogPagination();
+
   if (sortSelect) {
     sortSelect.addEventListener("change", () => {
       renderCatalog(catalogLastTotal);
       renderCatalogPagination();
     });
   }
+
   setupAdvancedCatalogFilters();
 }
 function exposeAppApi() {
