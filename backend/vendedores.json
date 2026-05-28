@@ -3,35 +3,35 @@
     {
       "id": 1,
       "nome": "Lenon",
-      "telefone": "5521975847628",
+      "telefone": "97584-7628",
       "ativo": true,
       "ordem": 1
     },
     {
       "id": 2,
       "nome": "Jaqueline",
-      "telefone": "5521996684430",
+      "telefone": "99668-4430",
       "ativo": true,
       "ordem": 2
     },
     {
       "id": 3,
       "nome": "Rogerio",
-      "telefone": "55219991066623",
+      "telefone": "99106-6623",
       "ativo": true,
       "ordem": 3
     },
     {
       "id": 4,
       "nome": "Janaina",
-      "telefone": "55219981540316",
+      "telefone": "98154-0316",
       "ativo": true,
       "ordem": 4
     },
     {
       "id": 5,
       "nome": "Rafaely",
-      "telefone": "558581556710",
+      "telefone": "85 8155-6710",
       "ativo": true,
       "ordem": 5
     }
