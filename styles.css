@@ -534,7 +534,7 @@ textarea{
 .heroAds__wrap{
   position:relative;
   min-height:520px;
-  padding-block:50px 90px;
+  padding-block:50px 110px;
 }
 
 .hero__left h1,
@@ -610,7 +610,7 @@ textarea{
 .heroSlider__dots{
   position:absolute;
   left:50%;
-  bottom:18px;
+  bottom:40px;
   transform:translateX(-50%);
   display:flex;
   align-items:center;
@@ -726,8 +726,8 @@ textarea{
   padding:18px;
   border:1px solid rgba(231,234,240,.92);
   border-radius:22px;
-  background:rgba(255,255,255,.94);
-  box-shadow:var(--shadow-md);
+  background:rgba(255, 255, 255, 0.623);
+  box-shadow: 0 14px 9px 0px rgba(16, 24, 40, .10);
   backdrop-filter:blur(14px);
 }
 
@@ -1213,10 +1213,11 @@ textarea{
   align-items:center;
   justify-content:center;
   padding:14px 18px;
-  border:1px solid rgba(217,223,235,.35);
+  border:2px solid rgba(255, 255, 255, 0.329);
   border-radius:18px;
-  background:#fff;
+  background:#ffffff79;
   box-shadow:var(--shadow-sm);
+  box-shadow: #000 0px 8px 24px rgba(16, 24, 40, .05);
 }
 
 .partnerLogoCard img{
