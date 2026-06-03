@@ -1368,7 +1368,7 @@ textarea{
   width:max-content;
   max-width:100%;
   margin:8px 0;
-  color:rgba(255,255,255,.68);
+  color:rgb(255, 255, 255);
 }
 
 .footer__col a:hover{
@@ -1377,7 +1377,7 @@ textarea{
 
 .footer__text{
   margin:0;
-  color:rgba(255,255,255,.68);
+  color:rgb(255, 255, 255);
   line-height:1.6;
 }
 
@@ -1386,7 +1386,7 @@ textarea{
   align-items:flex-start;
   gap:10px;
   margin:10px 0;
-  color:rgba(255,255,255,.68);
+  color:rgb(255, 255, 255);
   line-height:1.5;
 }
 
@@ -1396,7 +1396,7 @@ textarea{
 
 .footer__bottomInner{
   padding:14px 0;
-  color:rgba(255,255,255,.55);
+  color:rgb(255, 255, 255);
   font-size:14px;
   text-align:center;
 }
