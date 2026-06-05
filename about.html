@@ -3,19 +3,92 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Conde de Bonfim | Materiais de Construção</title>
+
+  <title>Sobre Nós | Conde de Bonfim</title>
+
   <meta
     name="description"
-    content="Tudo para sua obra em um só lugar. Materiais de construção no Rio de Janeiro com entrega e retirada."
+    content="Conheça a história da Eletro Ferragens Conde de Bonfim, loja de materiais de construção no Rio de Janeiro com atendimento, catálogo online, entrega, retirada e aluguel de caçambas estacionárias."
   />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <meta
+    name="keywords"
+    content="Conde de Bonfim, Eletro Ferragens Conde de Bonfim, materiais de construção no Rio de Janeiro, loja de construção RJ, ferragens, ferramentas, elétrica, hidráulica, aluguel de caçambas"
+  />
+
+  <meta name="author" content="Eletro Ferragens Conde de Bonfim" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#1f4bb8" />
+  <meta name="language" content="pt-BR" />
+
+  <link rel="canonical" href="https://condedebonfim.com/about.html" />
+
+  <link rel="icon" type="image/png" href="/assets/favicon.png?v=1" />
+  <link rel="shortcut icon" type="image/png" href="/assets/favicon.png?v=1" />
+  <link rel="apple-touch-icon" href="/assets/favicon.png?v=1" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:site_name" content="Conde de Bonfim" />
+  <meta property="og:title" content="Sobre Nós | Conde de Bonfim" />
+  <meta
+    property="og:description"
+    content="Tradição, atendimento e evolução digital em materiais de construção no Rio de Janeiro."
+  />
+  <meta property="og:url" content="https://condedebonfim.com/about.html" />
+  <meta property="og:image" content="https://condedebonfim.com/assets/og-image.jpg" />
+  <meta property="og:image:alt" content="Conde de Bonfim - Materiais de Construção no Rio de Janeiro" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Sobre Nós | Conde de Bonfim" />
+  <meta
+    name="twitter:description"
+    content="Conheça a Eletro Ferragens Conde de Bonfim, referência em materiais de construção no Rio de Janeiro."
+  />
+  <meta name="twitter:image" content="https://condedebonfim.com/assets/og-image.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet"
-  >
+  />
+
   <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Dados estruturados -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "Sobre Nós | Conde de Bonfim",
+    "url": "https://condedebonfim.com/about.html",
+    "description": "Página institucional da Eletro Ferragens Conde de Bonfim, loja de materiais de construção no Rio de Janeiro.",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Conde de Bonfim",
+      "url": "https://condedebonfim.com/"
+    },
+    "about": {
+      "@type": "HardwareStore",
+      "name": "Eletro Ferragens Conde de Bonfim",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Rua Vinte e Quatro de Maio, 494",
+        "addressLocality": "Rio de Janeiro",
+        "addressRegion": "RJ",
+        "addressCountry": "BR"
+      }
+    }
+  }
+  </script>
 </head>
+
 <body>
   <div class="topbar">
     <div class="container topbar__inner">
@@ -30,108 +103,507 @@
       </div>
 
       <nav class="topbar__right" aria-label="Navegação superior">
-        <a href="#entrega" class="topbar__link">Entrega e Retirada</a>
-        <a href="#sobre" class="topbar__link">Sobre Nós</a>
+        <a href="./index.html#cacambas" class="topbar__link">Aluguel de Caçambas</a>
+        <a href="./about.html" class="topbar__link">Sobre Nós</a>
         <a href="#contato" class="topbar__link">Contato</a>
       </nav>
     </div>
   </div>
 
   <header class="header">
-    <div class="container header__inner">
-      <a href="./index.html" class="brand">
-        <img src="./assets/logo.png" alt="Conde de Bonfim" class="brand__logo" />
-        <div>
-          <small>Eletro Ferragens</small>
+    <div class="container header__inner header__inner--store">
+      <a href="./index.html" class="brand brand--store" aria-label="Página inicial da Conde de Bonfim">
+        <span class="brand__logoWrap">
+          <img src="./assets/logo.png" alt="Conde de Bonfim" class="brand__logo" />
+        </span>
+
+        <span class="brand__text">
+          <span>Eletro Ferragens</span>
           <strong>Conde de Bonfim</strong>
-        </div>
+        </span>
       </a>
 
-      <a class="whatsBtn" href="https://wa.me/5521959039201" target="_blank" rel="noopener">
-        WhatsApp
-      </a>
+      <form class="search search--store" id="searchForm" role="search">
+        <label class="search__field">
+          <span class="search__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path d="M21 21l-4.3-4.3m1.3-5.2a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Buscar produtos, marcas e categorias..."
+            autocomplete="off"
+          />
+
+          <div class="searchSuggestions" id="searchSuggestions"></div>
+        </label>
+
+        <button class="btn btn--yellow search__button" type="submit">
+          Buscar
+        </button>
+      </form>
+
+      <div class="headerActions">
+        <a
+          class="whatsBtn"
+          href="https://wa.me/5521959039201?text=Olá! Vim pelo site da Conde de Bonfim."
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          WhatsApp
+        </a>
+
+        <button class="cartBtn" id="openCart" type="button" aria-label="Abrir carrinho">
+          🛒
+          <span class="cartBtn__badge" id="cartCount">0</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="headerMenu">
+      <div class="container headerMenu__inner">
+        <nav class="menu" aria-label="Menu principal">
+          <a class="menu__link" href="./index.html">Início</a>
+          <a class="menu__link" href="./catalogo.html">Catálogo</a>
+          <a class="menu__link" href="./index.html#ofertas">Promoções</a>
+          <a class="menu__link is-active" href="./about.html">Sobre Nós</a>
+          <a class="menu__link" href="#contato">Contato</a>
+        </nav>
+      </div>
     </div>
   </header>
 
-  <nav class="nav">
-    <div class="container nav__inner">
-      <a href="./index.html">Início</a>
-      <a href="./catalogo.html">Catálogo</a>
-      <a href="./index.html#ofertas">Promoções</a>
-      <a href="./contato.html">Contato</a>
-    </div>
-  </nav>
-
   <main>
-    <section class="aboutPage container">
-      <div class="aboutHero">
-        <h1>Sobre a Conde de Bonfim</h1>
+  <section class="aboutHeroPro">
+    <div class="container aboutHeroPro__grid">
+      <div class="aboutHeroPro__content">
+        <span class="aboutBadge">Desde 1967 no Rio de Janeiro</span>
+
+        <h1>
+          Tradição em materiais de construção.
+          Agora também no digital.
+        </h1>
+
         <p>
-          Há mais de 50 anos no mercado, somos referência em materiais de construção no Rio de Janeiro,
-          unindo tradição, confiança e evolução constante.
+          A Eletro Ferragens Conde de Bonfim une atendimento próximo, variedade de produtos,
+          experiência de mercado e catálogo online para facilitar a vida de quem constrói,
+          reforma ou mantém sua obra em movimento.
+        </p>
+
+        <div class="aboutHeroPro__actions">
+          <a class="btn btn--yellow" href="./catalogo.html">
+            Ver Catálogo
+          </a>
+
+          <a
+            class="btn btn--white"
+            href="https://wa.me/5521959039201?text=Olá! Vim pelo site da Conde de Bonfim e quero um orçamento."
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Falar no WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="aboutHeroPro__card">
+        <img src="./assets/hero.jpg" alt="Fachada da Eletro Ferragens Conde de Bonfim" />
+
+        <div class="aboutHeroPro__floating">
+          <strong>Conde de Bonfim</strong>
+          <span>Materiais de construção, ferragens, ferramentas e soluções para obra.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="aboutNumbers">
+    <div class="container aboutNumbers__grid">
+      <div class="aboutNumberCard">
+        <strong>50+</strong>
+        <span>anos de história</span>
+      </div>
+
+      <div class="aboutNumberCard">
+        <strong>RJ</strong>
+        <span>atendimento local</span>
+      </div>
+
+      <div class="aboutNumberCard">
+        <strong>Online</strong>
+        <span>catálogo digital</span>
+      </div>
+
+      <div class="aboutNumberCard">
+        <strong>Obra</strong>
+        <span>do básico ao acabamento</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="aboutStory">
+    <div class="container aboutStory__grid">
+      <div class="aboutStory__text">
+        <span class="aboutBadge aboutBadge--blue">Nossa trajetória</span>
+
+        <h2>Uma loja feita para quem constrói de verdade.</h2>
+
+        <p>
+          A Conde de Bonfim nasceu com uma proposta simples: atender bem, oferecer bons produtos
+          e estar presente nas necessidades reais dos clientes. Com o tempo, a loja acompanhou
+          as mudanças do mercado, ampliou seu atendimento e hoje conecta tradição com tecnologia.
+        </p>
+
+        <p>
+          Nosso catálogo online é parte dessa evolução: permite consultar produtos, montar orçamento,
+          entrar em contato pelo WhatsApp e encontrar soluções para obra com mais agilidade.
         </p>
       </div>
 
-      <div class="aboutGrid">
-        <div class="aboutCard">
-          <div class="aboutIcon">🏢</div>
-          <h3>Nossa História</h3>
-          <p>
-            Desde 1967, construímos uma trajetória sólida no mercado,
-            atendendo clientes com seriedade e compromisso.
-          </p>
+      <div class="aboutTimeline">
+        <div class="timelineItem">
+          <span>1967</span>
+          <div>
+            <h3>Início da trajetória</h3>
+            <p>Construção de uma história sólida no comércio de materiais de construção.</p>
+          </div>
         </div>
 
-        <div class="aboutCard">
-          <div class="aboutIcon">🧱</div>
-          <h3>O Que Fazemos</h3>
-          <p>
-            Oferecemos materiais elétricos, hidráulicos, ferramentas,
-            ferragens e tudo para sua obra.
-          </p>
+        <div class="timelineItem">
+          <span>Hoje</span>
+          <div>
+            <h3>Atendimento físico + digital</h3>
+            <p>Loja tradicional com catálogo online, WhatsApp e presença digital.</p>
+          </div>
         </div>
 
-        <div class="aboutCard">
-          <div class="aboutIcon">🤝</div>
-          <h3>Nosso Diferencial</h3>
-          <p>
-            Atendimento direto, suporte real e foco total em resolver
-            a necessidade do cliente.
-          </p>
-        </div>
-
-        <div class="aboutCard">
-          <div class="aboutIcon">🚀</div>
-          <h3>Inovação</h3>
-          <p>
-            Estamos evoluindo com catálogo online e atendimento digital,
-            sem perder nossa essência.
-          </p>
+        <div class="timelineItem">
+          <span>Futuro</span>
+          <div>
+            <h3>Mais tecnologia para vender melhor</h3>
+            <p>Busca inteligente, marcas parceiras, campanhas patrocinadas e orçamento online.</p>
+          </div>
         </div>
       </div>
+    </div>
+  </section>
 
-      <div class="aboutHighlight">
-        <div class="highlightBlock">
-          <h3>💡 Missão</h3>
-          <p>Facilitar o acesso a materiais com qualidade e preço justo.</p>
-        </div>
+  <section class="aboutPillars">
+    <div class="container">
+      <div class="section__head section__head--center">
+        <h2>O que nos move</h2>
+        <p>Atendimento, variedade e solução prática para quem precisa comprar certo.</p>
+      </div>
 
-        <div class="highlightBlock">
-          <h3>🎯 Visão</h3>
-          <p>Ser referência no RJ unindo tradição e tecnologia.</p>
-        </div>
+      <div class="aboutPillars__grid">
+        <article class="aboutPillarCard">
+          <div class="aboutPillarIcon">🧱</div>
+          <h3>Produtos para obra</h3>
+          <p>
+            Materiais elétricos, hidráulicos, ferragens, ferramentas, tintas, utilidades
+            e itens essenciais para construção, reforma e manutenção.
+          </p>
+        </article>
 
-        <div class="highlightBlock">
-          <h3>⚙️ Valores</h3>
-          <ul>
-            <li>Compromisso</li>
-            <li>Transparência</li>
-            <li>Qualidade</li>
-            <li>Evolução</li>
-          </ul>
+        <article class="aboutPillarCard">
+          <div class="aboutPillarIcon">🤝</div>
+          <h3>Atendimento direto</h3>
+          <p>
+            Comunicação simples, orçamento prático e suporte para ajudar o cliente a encontrar
+            o produto certo.
+          </p>
+        </article>
+
+        <article class="aboutPillarCard">
+          <div class="aboutPillarIcon">🚚</div>
+          <h3>Entrega e retirada</h3>
+          <p>
+            Opções para quem deseja retirar na loja ou consultar condições de entrega conforme
+            disponibilidade.
+          </p>
+        </article>
+
+        <article class="aboutPillarCard">
+          <div class="aboutPillarIcon">💻</div>
+          <h3>Catálogo online</h3>
+          <p>
+            Uma vitrine digital com busca, categorias, carrinho de orçamento e contato direto
+            via WhatsApp.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="aboutDigital">
+    <div class="container aboutDigital__box">
+      <div>
+        <span class="aboutBadge">Evolução digital</span>
+
+        <h2>Mais que uma loja. Um canal de compra inteligente.</h2>
+
+        <p>
+          O site da Conde de Bonfim foi criado para aproximar clientes, produtos e marcas.
+          A busca interna facilita a consulta, o carrinho organiza o orçamento e o WhatsApp
+          acelera o atendimento.
+        </p>
+      </div>
+
+      <div class="aboutDigital__features">
+        <span>Busca por produto, marca e categoria</span>
+        <span>Orçamento direto pelo WhatsApp</span>
+        <span>Marcas parceiras em destaque</span>
+        <span>Campanhas patrocinadas na página inicial</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="aboutServiceSplit">
+    <div class="container aboutServiceSplit__grid">
+      <div class="aboutServiceCard aboutServiceCard--blue">
+        <span class="aboutBadge">Materiais de construção</span>
+
+        <h2>Tudo para sua obra em um só lugar.</h2>
+
+        <p>
+          Produtos para construção, reforma, manutenção, elétrica, hidráulica, ferramentas,
+          ferragens e acabamento.
+        </p>
+
+        <a class="btn btn--yellow" href="./catalogo.html">
+          Acessar catálogo
+        </a>
+      </div>
+
+      <div class="aboutServiceCard aboutServiceCard--dark">
+        <span class="aboutBadge">Caçambas estacionárias</span>
+
+        <h2>Também atendemos obras com locação de caçambas.</h2>
+
+        <p>
+          Solução para reformas, retirada de entulho e descarte de resíduos da construção civil,
+          conforme disponibilidade e região.
+        </p>
+
+        <a
+          class="btn btn--yellow"
+          href="https://wa.me/5521959039201?text=Olá! Tenho interesse em aluguel de caçamba estacionária."
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Solicitar orçamento
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="aboutValues">
+    <div class="container aboutValues__grid">
+      <div class="aboutValueBlock">
+        <h3>Missão</h3>
+        <p>
+          Facilitar o acesso a materiais de construção com qualidade, atendimento direto
+          e soluções práticas para cada tipo de obra.
+        </p>
+      </div>
+
+      <div class="aboutValueBlock">
+        <h3>Visão</h3>
+        <p>
+          Ser referência local em materiais de construção, conectando tradição,
+          tecnologia e confiança.
+        </p>
+      </div>
+
+      <div class="aboutValueBlock">
+        <h3>Valores</h3>
+        <ul>
+          <li>Compromisso com o cliente</li>
+          <li>Transparência no atendimento</li>
+          <li>Agilidade na comunicação</li>
+          <li>Qualidade nos produtos</li>
+          <li>Evolução constante</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="aboutFinalCta">
+    <div class="container">
+      <div class="aboutFinalCta__box">
+        <h2>Precisa comprar para sua obra?</h2>
+
+        <p>
+          Consulte o catálogo online ou fale com nossa equipe pelo WhatsApp.
+        </p>
+
+        <div class="aboutFinalCta__actions">
+          <a class="btn btn--yellow" href="./catalogo.html">
+            Ver produtos
+          </a>
+
+          <a
+            class="btn btn--white"
+            href="https://wa.me/5521959039201?text=Olá! Vim pelo site da Conde de Bonfim e quero fazer um orçamento."
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Falar no WhatsApp
+          </a>
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
+</main>
+
+  <footer class="footer" id="contato">
+    <div class="container footer__grid">
+      <div class="footer__col">
+        <div class="footerBrand">
+          <span class="footerBrand__icon">
+            <img src="./assets/logo.png" alt="Conde de Bonfim" class="brand__logo" />
+          </span>
+
+          <div>
+            <span>Eletro Ferragens</span>
+            <strong>Conde de Bonfim</strong>
+          </div>
+        </div>
+
+        <p class="footer__text">
+          Sua loja de confiança para materiais de construção no Rio de Janeiro.
+          Qualidade, atendimento e preço justo.
+        </p>
+      </div>
+
+      <div class="footer__col">
+        <h4>Links Rápidos</h4>
+        <a href="./catalogo.html">Produtos</a>
+        <a href="./index.html#ofertas">Promoções</a>
+        <a href="./about.html">Sobre Nós</a>
+        <a href="./index.html#cacambas">Aluguel de Caçambas</a>
+      </div>
+
+      <div class="footer__col">
+        <h4>Atendimento</h4>
+        <a href="https://wa.me/5521959039201" target="_blank" rel="noopener noreferrer">Fale Conosco</a>
+        <a href="./catalogo.html">Solicitar Orçamento</a>
+        <a href="./index.html#entrega">Entrega e Retirada</a>
+      </div>
+
+      <div class="footer__col">
+        <h4>Contato</h4>
+
+        <div class="footerContact">
+          <span>📍</span>
+          <span>Rua Vinte e Quatro de Maio, 494<br>Riachuelo, Rio de Janeiro - RJ</span>
+        </div>
+
+        <div class="footerContact">
+          <span>📞</span>
+          <span>(21) 2581-4245 / (21) 95903-9201</span>
+        </div>
+
+        <div class="footerContact">
+          <span>✉️</span>
+          <span>contato@condedebonfim.com.br</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <div class="container footer__bottomInner">
+        © <span id="year">2026</span> Conde de Bonfim. Todos os direitos reservados.
+      </div>
+    </div>
+  </footer>
+
+  <button class="floatingCart" id="floatingCart" type="button" aria-label="Abrir carrinho flutuante">
+    <span class="floatingCart__icon">🛒</span>
+    <span class="floatingCart__badge" id="floatingCartCount">0</span>
+  </button>
+
+  <a
+    class="waFloat"
+    id="waFloat"
+    href="https://wa.me/5521959039201"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Falar no WhatsApp"
+  >
+    <span class="waFloat__icon">💬</span>
+  </a>
+
+  <div class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer__backdrop" id="drawerBackdrop"></div>
+
+    <aside class="drawer__panel" aria-label="Carrinho">
+      <div class="drawer__head">
+        <strong>Meu orçamento</strong>
+
+        <button class="iconBtn" id="closeCart" type="button" aria-label="Fechar carrinho">
+          ×
+        </button>
+      </div>
+
+      <div class="drawer__body">
+        <div class="cartEmpty" id="cartEmpty">
+          <strong>Seu carrinho está vazio.</strong>
+          <span>Adicione produtos para montar seu orçamento.</span>
+        </div>
+
+        <div class="cartList" id="cartList"></div>
+      </div>
+
+      <div class="cartFooter">
+        <div class="cartSubtotal">
+          <span>Subtotal</span>
+          <strong id="cartSubtotal">R$ 0,00</strong>
+        </div>
+
+        <div class="cartCustomerFields">
+          <label class="cartField">
+            <span>Nome</span>
+            <input id="customerName" type="text" placeholder="Seu nome" />
+          </label>
+
+          <label class="cartField">
+            <span>Telefone</span>
+            <input id="customerPhone" type="tel" placeholder="(21) 99999-9999" />
+          </label>
+
+          <label class="cartField" id="addressField">
+            <span>Endereço</span>
+            <textarea id="customerAddress" rows="2" placeholder="Informe o endereço de entrega"></textarea>
+          </label>
+
+          <div class="deliveryOptions">
+            <label class="deliveryOption">
+              <input type="radio" name="deliveryType" value="Entrega" checked />
+              <span>Entrega</span>
+            </label>
+
+            <label class="deliveryOption">
+              <input type="radio" name="deliveryType" value="Retirada" />
+              <span>Retirada</span>
+            </label>
+          </div>
+        </div>
+
+        <button class="continueShoppingBtn" id="continueShoppingBtn" type="button">
+          Continuar comprando
+        </button>
+
+        <button class="checkoutBtn checkoutBtn--blue" id="goCheckoutBtn" type="button">
+          Finalizar orçamento
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <script src="./app.js"></script>
 </body>
 </html>

@@ -175,14 +175,23 @@ function getCategorySource() {
 }
 function getDynamicCategories() {
   if (ALL_CATEGORIES.length) {
-    return ["Todos", ...ALL_CATEGORIES];
+    return [
+      "Todos",
+      ...ALL_CATEGORIES.map((category) => {
+        if (typeof category === "string") return category;
+        return String(category.name || "").trim();
+      }).filter(Boolean)
+    ];
   }
+
   const source = PRODUCTS.length ? PRODUCTS : getCategorySource();
+
   const categories = [...new Set(
     source
       .map((product) => String(product.category || "").trim())
       .filter(Boolean)
   )].sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }));
+
   return ["Todos", ...categories];
 }
 function getDynamicCategoriesWithCount() {
@@ -228,8 +237,17 @@ async function loadAllCategories() {
   }
 }
 function ensureActiveCategoryIsValid() {
-  const categories = getDynamicCategories();
-  if (!categories.includes(activeCategory)) {
+  const current = String(activeCategory || "Todos").trim();
+
+  if (current === "Todos") {
+    activeCategory = "Todos";
+    return;
+  }
+
+  const categories = getDynamicCategoriesWithCount()
+    .map((category) => String(category.name || "").trim());
+
+  if (!categories.includes(current)) {
     activeCategory = "Todos";
   }
 }
@@ -493,7 +511,8 @@ async function loadCatalogPage(reset = false) {
   document.querySelector('input[name="categoryFilter"]:checked')?.value ||
   activeCategory ||
   "Todos";
-  activeCategory = String(activeCategory || "Todos").trim();
+
+  activeCategory = String(selectedCategory || "Todos").trim();
   if (reset) {
     catalogPage = 1;
   }
@@ -1521,23 +1540,26 @@ function setupAdvancedCatalogFilters() {
     });
   }
   priceRangeButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const value = button.dataset.priceRange || "";
-      if (value === "0-150") {
-        catalogFilters.minPrice = 0;
-        catalogFilters.maxPrice = 150;
-      } else if (value === "150-250") {
-        catalogFilters.minPrice = 150;
-        catalogFilters.maxPrice = 250;
-      } else if (value === "250+") {
-        catalogFilters.minPrice = 250;
-        catalogFilters.maxPrice = null;
-      }
-      if (priceMinInput) priceMinInput.value = catalogFilters.minPrice ?? "";
-      if (priceMaxInput) priceMaxInput.value = catalogFilters.maxPrice ?? "";
-      renderCatalog(catalogLastTotal);
-    });
+  button.addEventListener("click", () => {
+    const value = button.dataset.priceRange || "";
+
+    if (value === "0-150") {
+      catalogFilters.minPrice = 0;
+      catalogFilters.maxPrice = 150;
+    } else if (value === "150-250") {
+      catalogFilters.minPrice = 150;
+      catalogFilters.maxPrice = 250;
+    } else if (value === "250+") {
+      catalogFilters.minPrice = 250;
+      catalogFilters.maxPrice = null;
+    }
+
+    if (priceMinInput) priceMinInput.value = catalogFilters.minPrice ?? "";
+    if (priceMaxInput) priceMaxInput.value = catalogFilters.maxPrice ?? "";
+
+    renderCatalog(catalogLastTotal);
   });
+});
   if (applyPriceBtn) {
     applyPriceBtn.addEventListener("click", () => {
       const minRaw = priceMinInput?.value?.trim() || "";

@@ -182,6 +182,7 @@
           <a href="./index.html" class="menu__link">Início</a>
           <a href="./catalogo.html" class="menu__link is-active">Catálogo</a>
           <a href="./index.html#ofertas" class="menu__link">Promoções</a>
+          <a href="./about.html" class="menu__link">Sobre Nós</a>
           <a href="./index.html#contato" class="menu__link">Contato</a>
         </nav>
       </div>
@@ -250,28 +251,48 @@
               </label>
             </div>
 
-            <div class="filterSectioninter">
-              <h3 class="filterSection__title">Preço</h3>
+            <div class="filterSection">
+  <h3 class="filterSection__title">Preço</h3>
 
-              <button type="button" class="filterLinkBtn filterLinkBtn--muted" data-price-range="0-150">
-                Até R$ 150
-              </button>
+  <button class="filterLinkBtn priceRangeBtn" type="button" data-price-range="0-150">
+    Até R$ 150
+  </button>
 
-              <button type="button" class="filterLinkBtn filterLinkBtn--muted" data-price-range="150-250">
-                R$ 150 a R$ 250
-              </button>
+  <button class="filterLinkBtn priceRangeBtn" type="button" data-price-range="150-250">
+    R$ 150 a R$ 250
+  </button>
 
-              <button type="button" class="filterLinkBtn filterLinkBtn--muted" data-price-range="250+">
-                Mais de R$ 250
-              </button>
+  <button class="filterLinkBtn priceRangeBtn" type="button" data-price-range="250+">
+    Mais de R$ 250
+  </button>
 
-              <div class="priceRangeBox">
-                <input type="number" id="priceMinInput" placeholder="Mínimo">
-                <span class="priceRangeSeparator">—</span>
-                <input type="number" id="priceMaxInput" placeholder="Máximo">
-                <button type="button" id="applyPriceFilterBtn" class="priceApplyBtn">›</button>
-              </div>
-            </div>
+  <div class="priceRangeBox">
+    <input
+      type="number"
+      id="priceMinInput"
+      placeholder="Mín"
+      min="0"
+    />
+
+    <span class="priceRangeSeparator">—</span>
+
+    <input
+      type="number"
+      id="priceMaxInput"
+      placeholder="Máx"
+      min="0"
+    />
+
+    <button
+      type="button"
+      id="applyPriceFilterBtn"
+      class="priceApplyBtn"
+      aria-label="Aplicar filtro de preço"
+    >
+      ›
+    </button>
+  </div>
+</div>
 
             <div class="filterSectioninter">
               <h3 class="filterSection__title">Tipo de promoção</h3>
