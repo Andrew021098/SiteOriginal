@@ -531,7 +531,7 @@ async function loadOffersPage(reset = false) {
     category: activeCategory
   });
   const promoProducts = (Array.isArray(result.products) ? result.products : [])
-    .filter((product) => typeof product.offPct === "number" && product.offPct > 0)
+    .filter((product) => typeof product.offPct === "number" && product.offPct > 50)
     .sort((a, b) => Number(b.offPct || 0) - Number(a.offPct || 0))
     .slice(0, 9);
   offersLoadedProducts = promoProducts;
@@ -768,8 +768,8 @@ function renderCategories() {
     card.className = "catCard" + (activeCategory === category.name ? " is-active" : "");
     card.type = "button";
     card.innerHTML = `
-      <div class="catIcon">📦</div>
-      <div class="catContent">
+      <div class="catIcon">✅</div>
+        <div class="catContent">
         <div class="catTitle">${escapeHtml(category.name)}</div>
         <div class="catCount">
           ${typeof category.count === "number" ? `${category.count} itens` : ""}
