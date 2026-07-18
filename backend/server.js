@@ -294,21 +294,35 @@ function requireInternalApiKey(req, res, next) {
    FIREBIRD HELPERS
 ========================= */
 
+let firebirdOpenConnections = 0;
+
 function firebirdQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
     Firebird.attach(firebirdOptions, (attachErr, db) => {
       if (attachErr) {
+        console.error("Erro ao conectar no Firebird:", attachErr);
         return reject(attachErr);
       }
 
+      firebirdOpenConnections += 1;
+      console.log("🔥 Firebird conectado. Conexões abertas:", firebirdOpenConnections);
+
       db.query(sql, params, (queryErr, result) => {
-        db.detach();
+        db.detach((detachErr) => {
+          firebirdOpenConnections = Math.max(0, firebirdOpenConnections - 1);
+          console.log("✅ Firebird desconectado. Conexões abertas:", firebirdOpenConnections);
 
-        if (queryErr) {
-          return reject(queryErr);
-        }
+          if (detachErr) {
+            console.error("Erro ao encerrar conexão Firebird:", detachErr);
+          }
 
-        resolve(result || []);
+          if (queryErr) {
+            console.error("Erro na consulta Firebird:", queryErr);
+            return reject(queryErr);
+          }
+
+          return resolve(result);
+        });
       });
     });
   });
